@@ -1,5 +1,6 @@
 import tkinter as tk
 from functools import partial
+from story.script import SCENE_SCRIPT # 匯入劇本資料
 
 # --- 1. Model 層: 角色類別 (由戰鬥系統負責人主要實作) ---
 class Character:
