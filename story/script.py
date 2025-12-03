@@ -54,20 +54,23 @@ SCENE_SCRIPT = {
             "調查": "SLIME_INFO",
             "戰鬥": "BATTLE_SLIME", # 特殊動作代號
             "逃跑": "END_RUN"
-        }
+        },
+        "image": "assets/images/silme.png" # 圖片檔放在 images/ 目錄下
     },
     "SLIME_INFO": {
         "text": "史萊姆看起來很飢餓。你確認了，這確實是一隻史萊姆。",
         "choices": {
             "準備戰鬥": "BATTLE_SLIME",
             "偷偷溜走": "END_RUN"
-        }
+        },
+        "image": "assets/images/slime_info.png"
     },
     "WIN_SLIME": {
         "text": "你贏了！史萊姆倒下了。你發現了一把生鏽的鑰匙。",
         "choices": {
             "繼續探索": "SCENE_2_ROOM"
-        }
+        },
+        "image": "assets/images/key.png"
     },
     "SCENE_2_ROOM": {
         "text": "你來到了一扇古老的門前，這似乎是地下城的第二層入口。",

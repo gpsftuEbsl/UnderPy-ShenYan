@@ -32,14 +32,14 @@ class GameManager:
         self.current_scene_id = "START" # 追蹤目前場景
 
     # --- 核心邏輯修改 ---
-    
+
     # 刪除：start_game (用 load_scene 取代)
     def start_game(self, *args):
         """遊戲啟動和重置點：載入起始場景。"""
         self.player.hp = self.player.max_hp # 重置 HP
         self.ui.update_status(f"HP: {self.player.hp}/{self.player.max_hp}")
         self.load_scene("START")
-        
+    
     # 新增：載入場景
     def load_scene(self, scene_id):
         self.current_scene_id = scene_id
@@ -48,10 +48,18 @@ class GameManager:
         if not scene:
             self.ui.update_text(f"錯誤：找不到場景 ID: {scene_id}")
             self.ui.set_choices([], None)
+            self.ui.update_image(None)  # 清空圖片
             return
 
         self.game_state = "SCENE"
         self.ui.update_text(scene["text"])
+        
+        # 設定圖片
+        image_path = scene.get("image")  # 劇本每個場景可以有 "image" key
+        if image_path:
+            self.ui.update_image(image_path)
+        else:
+            self.ui.update_image(None)  # 沒圖片就清空
         
         # 設置按鈕，所有劇情按鈕都導向 handle_scene_choice
         choices = list(scene["choices"].keys())
@@ -126,7 +134,7 @@ class GameUI:
         self.master = master
         self.game = game_manager
         self.master.title("UnderPy")
-        self.master.geometry("600x500")  # 稍微加高一點
+        self.master.geometry("600x500")  # 稍微加高一點給圖片空間
 
         # 狀態顯示區
         self.status_label = tk.Label(master, text="HP:", anchor="w", fg="red")
@@ -135,6 +143,7 @@ class GameUI:
         # 圖片顯示區
         self.image_label = tk.Label(master)
         self.image_label.pack(pady=5)
+        self.current_image = None  # 儲存當前圖片，避免被 GC 回收
 
         # 劇情文字區
         self.text_area = tk.Text(master, height=10, state='disabled')
@@ -144,15 +153,43 @@ class GameUI:
         self.button_frame = tk.Frame(master)
         self.button_frame.pack(pady=10)
 
-        # 儲存目前的圖片，避免被 GC 回收
-        self.current_image = None
+    # UI 方法：更新狀態欄文字
+    def update_status(self, text):
+        self.status_label.config(text=text)
 
-    # 更新圖片
+    # UI 方法：更新劇情文字
+    def update_text(self, text):
+        self.text_area.config(state='normal')
+        self.text_area.delete('1.0', tk.END)
+        self.text_area.insert(tk.END, text + "\n")
+        self.text_area.config(state='disabled')
+
+    # UI 方法：附加劇情文字
+    def append_text(self, text):
+        self.text_area.config(state='normal')
+        self.text_area.insert(tk.END, text + "\n")
+        self.text_area.see(tk.END)  # 滾動到底部
+        self.text_area.config(state='disabled')
+
+    # UI 方法：動態生成按鈕
+    def set_choices(self, choices, handler_function):
+        # 清除舊按鈕
+        for widget in self.button_frame.winfo_children():
+            widget.destroy()
+
+        # 生成新按鈕
+        for choice in choices:
+            command = partial(handler_function, choice)
+            btn = tk.Button(self.button_frame, text=choice, command=command, width=15)
+            btn.pack(side="left", padx=10)
+
+    # UI 方法：更新圖片
     def update_image(self, image_path=None):
         if image_path:
             try:
                 img = Image.open(image_path)
-                img = img.resize((400, 200), Image.ANTIALIAS)  # 調整大小
+                # Pillow 10.0+ 使用 Resampling.LANCZOS 取代舊的 ANTIALIAS
+                img = img.resize((400, 400), Image.Resampling.LANCZOS)
                 self.current_image = ImageTk.PhotoImage(img)
                 self.image_label.config(image=self.current_image)
             except Exception as e:
@@ -160,7 +197,6 @@ class GameUI:
                 self.image_label.config(image="")
         else:
             self.image_label.config(image="")
-
 
 # --- 4. 程式啟動 ---
 if __name__ == '__main__':
