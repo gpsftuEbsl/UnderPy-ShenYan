@@ -1,6 +1,7 @@
 import tkinter as tk
 from functools import partial
 from story.script import SCENE_SCRIPT # 匯入劇本資料
+from PIL import Image, ImageTk
 
 # --- 1. Model 層: 角色類別 (由戰鬥系統負責人主要實作) ---
 class Character:
@@ -118,16 +119,22 @@ class GameManager:
         self.ui.set_choices(["攻擊", "防禦", "逃跑"], self.handle_battle_choice)
 
 # --- 3. View 層: 介面類別 (由介面整合負責人主要實作) ---
+# from PIL import Image, ImageTk  # 需要安裝 Pillow: pip install pillow
+
 class GameUI:
     def __init__(self, master, game_manager):
         self.master = master
         self.game = game_manager
-        self.master.title("UnderPy 雛形")
-        self.master.geometry("600x400")
-        
+        self.master.title("UnderPy")
+        self.master.geometry("600x500")  # 稍微加高一點
+
         # 狀態顯示區
         self.status_label = tk.Label(master, text="HP:", anchor="w", fg="red")
         self.status_label.pack(pady=(10, 5), padx=20, fill="x")
+
+        # 圖片顯示區
+        self.image_label = tk.Label(master)
+        self.image_label.pack(pady=5)
 
         # 劇情文字區
         self.text_area = tk.Text(master, height=10, state='disabled')
@@ -137,42 +144,22 @@ class GameUI:
         self.button_frame = tk.Frame(master)
         self.button_frame.pack(pady=10)
 
-    # UI 方法：更新狀態欄文字
-    def update_status(self, text):
-        self.status_label.config(text=text)
+        # 儲存目前的圖片，避免被 GC 回收
+        self.current_image = None
 
-    # UI 方法：更新劇情文字
-    def update_text(self, text):
-        self.text_area.config(state='normal')
-        self.text_area.delete('1.0', tk.END)
-        self.text_area.insert(tk.END, text + "\n")
-        self.text_area.config(state='disabled')
-    
-    # UI 方法：附加劇情文字
-    def append_text(self, text):
-        self.text_area.config(state='normal')
-        self.text_area.insert(tk.END, text + "\n")
-        self.text_area.see(tk.END) # 滾動到底部
-        self.text_area.config(state='disabled')
-
-    # UI 方法：動態生成按鈕 (這是分工整合的關鍵)
-    def set_choices(self, choices, handler_function):
-        # 清除舊按鈕
-        for widget in self.button_frame.winfo_children():
-            widget.destroy()
-
-        # 生成新按鈕
-        for choice in choices:
-            ## (棄用)另外處理沒有參數(仍有1個self隱藏參數)的start_game
-            #if handler_function is self.game.start_game:
-            #    command = self.game.start_game
-            #else:
-            
-            # 使用 partial 函式將 choice 作為參數傳遞給 handler_function
-            # 因為 tk.Button() 只接受無參數的 command
-            command = partial(handler_function, choice)
-            btn = tk.Button(self.button_frame, text=choice, command=command, width=15)
-            btn.pack(side="left", padx=10)
+    # 更新圖片
+    def update_image(self, image_path=None):
+        if image_path:
+            try:
+                img = Image.open(image_path)
+                img = img.resize((400, 200), Image.ANTIALIAS)  # 調整大小
+                self.current_image = ImageTk.PhotoImage(img)
+                self.image_label.config(image=self.current_image)
+            except Exception as e:
+                print(f"載入圖片失敗: {e}")
+                self.image_label.config(image="")
+        else:
+            self.image_label.config(image="")
 
 
 # --- 4. 程式啟動 ---
