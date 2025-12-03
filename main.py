@@ -1,5 +1,6 @@
 import tkinter as tk
 from functools import partial
+from story.script import SCENE_SCRIPT # 匯入劇本資料
 
 # --- 1. Model 層: 角色類別 (由戰鬥系統負責人主要實作) ---
 class Character:
@@ -19,61 +20,102 @@ class Character:
             target.hp = 0
         return f"{self.name} 攻擊了 {target.name}，造成 {damage} 點傷害！"
 
-# --- 2. Controller 層: 遊戲管理器 (由場景與流程負責人主要實作) ---
+# --- 2. Controller 層: 遊戲管理器 (修改後的主程式) ---
 class GameManager:
     def __init__(self, ui):
-        self.ui = ui # user interface (hp etc)
+        self.ui = ui
         self.player = Character("勇者", 100, 15)
         self.current_enemy = None
-        self.game_state = "EXPLORE" # 遊戲狀態：探索 / 戰鬥
+        self.game_state = "SCENE" # 初始狀態設為 SCENE (劇情/探索)
+        self.script_data = SCENE_SCRIPT # 載入劇本
+        self.current_scene_id = "START" # 追蹤目前場景
 
-    def start_game(self, *args): # *args 額外參數收集器
+    # --- 核心邏輯修改 ---
+    
+    # 刪除：start_game (用 load_scene 取代)
+    def start_game(self, *args):
+        """遊戲啟動和重置點：載入起始場景。"""
+        self.player.hp = self.player.max_hp # 重置 HP
         self.ui.update_status(f"HP: {self.player.hp}/{self.player.max_hp}")
-        self.ui.update_text("你進入了一個地下城。前方出現一隻史萊姆！")
-        self.current_enemy = Character("史萊姆", 30, 5)
-        self.game_state = "EXPLORE"
-        # 設定探索時的按鈕選項，點擊後呼叫 handle_explore_choice
-        self.ui.set_choices(["調查", "戰鬥", "逃跑"], self.handle_explore_choice)
+        self.load_scene("START")
+        
+    # 新增：載入場景
+    def load_scene(self, scene_id):
+        self.current_scene_id = scene_id
+        scene = self.script_data.get(scene_id)
+        
+        if not scene:
+            self.ui.update_text(f"錯誤：找不到場景 ID: {scene_id}")
+            self.ui.set_choices([], None)
+            return
 
-    def handle_explore_choice(self, choice):
-        if choice == "戰鬥":
-            self.game_state = "BATTLE"
-            self.ui.update_text(f"進入戰鬥！面對 {self.current_enemy.name} (HP: {self.current_enemy.hp})")
-            self.ui.set_choices(["攻擊", "防禦", "逃跑"], self.handle_battle_choice)
-        elif choice == "調查":
-            self.ui.update_text("史萊姆看起來很飢餓。")
-        elif choice == "逃跑":
-             self.ui.update_text("你逃跑了！遊戲結束。")
-             self.ui.set_choices([], None)
-             
-    # 戰鬥演算法設計的核心部分
+        self.game_state = "SCENE"
+        self.ui.update_text(scene["text"])
+        
+        # 設置按鈕，所有劇情按鈕都導向 handle_scene_choice
+        choices = list(scene["choices"].keys())
+        self.ui.set_choices(choices, self.handle_scene_choice)
+
+    # 刪除：handle_explore_choice (用 handle_scene_choice 取代)
+    # 新增：處理劇情選項的通用函式
+    def handle_scene_choice(self, choice):
+        current_scene = self.script_data[self.current_scene_id]
+        next_action = current_scene["choices"].get(choice)
+
+        if not next_action:
+            self.ui.append_text("無效的選項。")
+            return
+            
+        # 處理特殊動作：戰鬥
+        if next_action == "BATTLE_SLIME":
+            self.enter_battle("史萊姆", 30, 5) # 進入戰鬥專屬流程
+            return
+        
+        # 處理特殊動作：遊戲結束
+        elif next_action.startswith("END"):
+            self.load_scene(next_action) # 載入結束畫面 (例如 END_RUN)
+            self.ui.set_choices([], None) # 清空按鈕
+            return
+        
+        # 處理場景切換
+        else:
+            self.load_scene(next_action)
+
+    # 新增：專門用於處理進入戰鬥的函式
+    def enter_battle(self, enemy_name, hp, atk):
+        self.game_state = "BATTLE"
+        self.current_enemy = Character(enemy_name, hp, atk)
+        self.ui.update_text(f"進入戰鬥！面對 {self.current_enemy.name} (HP: {self.current_enemy.hp}/{self.current_enemy.max_hp})")
+        self.ui.set_choices(["攻擊", "防禦", "逃跑"], self.handle_battle_choice)
+
+    # 戰鬥演算法設計的核心部分 (微調結束邏輯)
     def handle_battle_choice(self, action):
-        # 1. 玩家行動
+        # 1. 玩家行動... (不變)
         if action == "攻擊":
             message = self.player.attack(self.current_enemy)
             self.ui.append_text(message)
 
-        # 2. 判定勝負
+        # 2. 判定勝負 (玩家勝利)
         if not self.current_enemy.is_alive():
-            self.ui.append_text("你贏了！史萊姆倒下了。")
-            self.game_state = "EXPLORE"
-            self.ui.set_choices(["繼續探索"], self.start_game)
+            self.ui.append_text(f"你贏了！{self.current_enemy.name} 倒下了。")
+            self.game_state = "SCENE"
+            # 戰勝後，跳轉到 'WIN_SLIME' 場景
+            self.load_scene("WIN_SLIME") 
             return
 
-        # 3. 敵人反擊
+        # 3. 敵人反擊... (不變)
         enemy_message = self.current_enemy.attack(self.player)
         self.ui.append_text(enemy_message)
         self.ui.update_status(f"HP: {self.player.hp}/{self.player.max_hp}")
 
-        # 4. 判定玩家是否戰敗
+        # 4. 判定玩家是否戰敗... (不變)
         if not self.player.is_alive():
             self.ui.append_text("你戰敗了！Game Over。")
             self.ui.set_choices([], None)
             return
 
-        # 保持在戰鬥狀態，等待下一次輸入
+        # 保持在戰鬥狀態... (不變)
         self.ui.set_choices(["攻擊", "防禦", "逃跑"], self.handle_battle_choice)
-
 
 # --- 3. View 層: 介面類別 (由介面整合負責人主要實作) ---
 class GameUI:
