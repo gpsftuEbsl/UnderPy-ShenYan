@@ -73,7 +73,7 @@ def boss_battle():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                sys.exit()
+                return "QUIT"  # <--- 重點：改成 return 字串，不要 sys.exit()
 
         # ---- 玩家移動 ----
         keys = pygame.key.get_pressed()
@@ -99,6 +99,7 @@ def boss_battle():
                 bullets.remove(b)
 
                 if heart.hp <= 0:
+                    pygame.quit() # 關閉 pygame 視窗
                     return "LOSE"
 
         # ---- 畫區域、玩家、子彈 ----
@@ -116,7 +117,9 @@ def boss_battle():
 
         # ---- 勝利條件：60 秒沒死 ----
         if frame > FPS * 60:
+            pygame.quit() # 關閉pygmae視窗
             return "WIN"
+        
 
 
 # ------------ 單獨測試用 ------------

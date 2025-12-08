@@ -3,6 +3,10 @@ from functools import partial
 from story.script import SCENE_SCRIPT # 匯入劇本資料
 from PIL import Image, ImageTk
 
+# 新增這一行來引入戰鬥功能
+# 確保 battle 資料夾內有一個空的 __init__.py 檔案，或者 Python 3.3+ 通常可以直接 import
+from battle.battle_game import boss_battle
+
 # --- 1. Model 層: 角色類別 (由戰鬥系統負責人主要實作) ---
 class Character:
     def __init__(self, name, hp, atk):
@@ -76,8 +80,27 @@ class GameManager:
             return
             
         # 處理特殊動作：戰鬥
+        # --- 已修改：處理戰鬥切換 ---
         if next_action == "BATTLE_SLIME":
-            self.enter_battle("史萊姆", 30, 5) # 進入戰鬥專屬流程
+            # 1. (選用) 隱藏 Tkinter 主視窗，讓玩家專注在 Pygame 視窗
+            self.ui.master.withdraw() 
+            
+            # 2. 呼叫 Pygame 的戰鬥函式，程式會暫停在這裡直到戰鬥結束
+            # result 會接收到 "WIN", "LOSE" 或 "QUIT"
+            result = boss_battle() 
+            
+            # 3. 戰鬥結束，重新顯示 Tkinter 主視窗
+            self.ui.master.deiconify() 
+            
+            # 4. 根據戰鬥結果決定劇情
+            if result == "WIN":
+                self.load_scene("WIN_SLIME") # 載入勝利劇情 (記得劇本要有這個 Key)
+            elif result == "LOSE":
+                self.ui.update_text("你的決心碎裂了... (Game Over)")
+                self.ui.set_choices([], None) # 清空按鈕或導向讀檔
+            else: # QUIT
+                self.ui.update_text("你逃離了戰場。")
+            
             return
         
         # 處理特殊動作：遊戲結束
