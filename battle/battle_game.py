@@ -1,31 +1,24 @@
 import pygame
 import random
-import sys
 
 # ------------ 設定 ------------
 WIDTH, HEIGHT = 480, 360
 FPS = 60
+BATTLE_TIME = 30
 
-BOX_RECT = pygame.Rect(80, 60, 320, 240)  # 心臟活動區域
+BOX_RECT = pygame.Rect(80, 60, 320, 240)
 HEART_SPEED = 4
 BULLET_SPEED = 4
-SPAWN_RATE = 25 
-PLAYER_HP = 5
+SPAWN_RATE = 25
+PLAYER_HP = 100
 
-# ------------ Pygame 初始化 ------------
-pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Boss Battle – UnderPy")
-clock = pygame.time.Clock()
 
-font = pygame.font.SysFont("arial", 24)
-
-# ------------ 玩家（心臟）物件 ------------
+# ------------ 玩家（心臟） ------------
 class Heart:
     def __init__(self):
         self.x = BOX_RECT.centerx
         self.y = BOX_RECT.centery
-        self.r = 8  # 心臟半徑
+        self.r = 8
         self.hp = PLAYER_HP
 
     def move(self, keys):
@@ -38,28 +31,35 @@ class Heart:
         if keys[pygame.K_RIGHT] and self.x + self.r < BOX_RECT.right:
             self.x += HEART_SPEED
 
-    def draw(self):
+    def draw(self, screen):
         pygame.draw.circle(screen, (255, 0, 0), (self.x, self.y), self.r)
 
-# ------------ 子彈（魔王攻擊） ------------
+
+# ------------ 子彈 ------------
 class Bullet:
     def __init__(self):
-        # 從上方隨機位置出現
         self.x = random.randint(BOX_RECT.left, BOX_RECT.right)
         self.y = BOX_RECT.top
-        self.size = 8
+        self.size = 30
 
     def update(self):
         self.y += BULLET_SPEED
 
-    def draw(self):
+    def draw(self, screen):
         pygame.draw.rect(screen, (255, 255, 0), (self.x, self.y, self.size, self.size))
 
     def is_off_screen(self):
         return self.y > BOX_RECT.bottom
 
-# ------------ 主程式（Boss 戰 Loop） ------------
+
+# ------------ Boss 戰主函式 ------------
 def boss_battle():
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Boss Battle – UnderPy")
+    clock = pygame.time.Clock()
+    font = pygame.font.SysFont("arial", 24)
+
     heart = Heart()
     bullets = []
     frame = 0
@@ -69,60 +69,60 @@ def boss_battle():
         clock.tick(FPS)
         screen.fill((0, 0, 0))
 
-        # ---- 處理事件 ----
+        # ---- 事件 ----
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                return "QUIT"  # <--- 重點：改成 return 字串，不要 sys.exit()
+                return "QUIT"
 
         # ---- 玩家移動 ----
         keys = pygame.key.get_pressed()
         heart.move(keys)
 
-        # ---- 生成子彈 ----
+        # ---- 時間 ----
         frame += 1
+        remaining_time = max(0, BATTLE_TIME - frame // FPS)
+
+        # ---- 生成子彈 ----
         if frame % SPAWN_RATE == 0:
             bullets.append(Bullet())
 
-        # ---- 更新子彈 & 碰撞 ----
+        # ---- 子彈更新 & 碰撞 ----
         for b in bullets[:]:
             b.update()
+
             if b.is_off_screen():
                 bullets.remove(b)
                 continue
 
-            # 碰撞檢查
             if pygame.Rect(b.x, b.y, b.size, b.size).colliderect(
-                pygame.Rect(heart.x - heart.r, heart.y - heart.r, heart.r*2, heart.r*2)
+                pygame.Rect(heart.x - heart.r, heart.y - heart.r, heart.r * 2, heart.r * 2)
             ):
-                heart.hp -= 1
+                heart.hp -= 20
                 bullets.remove(b)
 
                 if heart.hp <= 0:
-                    pygame.quit() # 關閉 pygame 視窗
+                    pygame.quit()
                     return "LOSE"
 
-        # ---- 畫區域、玩家、子彈 ----
+        # ---- 繪圖 ----
         pygame.draw.rect(screen, (255, 255, 255), BOX_RECT, 2)
-        heart.draw()
+        heart.draw(screen)
 
         for b in bullets:
-            b.draw()
+            b.draw(screen)
 
-        # ---- 畫 HP ----
-        hp_text = font.render(f"HP: {heart.hp}", True, (255, 255, 255))
-        screen.blit(hp_text, (20, 20))
+        screen.blit(font.render(f"HP: {heart.hp}", True, (255, 255, 255)), (20, 20))
+        screen.blit(font.render(f"Time: {remaining_time}", True, (255, 255, 255)), (350, 20))
 
         pygame.display.update()
 
-        # ---- 勝利條件：60 秒沒死 ----
-        if frame > FPS * 60:
-            pygame.quit() # 關閉pygmae視窗
+        # ---- 勝利條件 ----
+        if remaining_time <= 0:
+            pygame.quit()
             return "WIN"
-        
 
 
-# ------------ 單獨測試用 ------------
+# ------------ 單獨測試 ------------
 if __name__ == "__main__":
-    result = boss_battle()
-    print("Battle Result:", result)
+    print(boss_battle())
