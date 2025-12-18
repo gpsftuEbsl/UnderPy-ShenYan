@@ -164,14 +164,14 @@ class GameUI:
         # 圖片顯示區
         self.image_label = tk.Label(master)
         self.image_label.pack(pady=5)
-        self.current_image = None  # 儲存當前圖片，避免被 GC 回收
+        self.current_image = None  # 設一空變數，用來儲存當前圖片，避免被 GC 回收
 
         # 劇情文字區
-        self.text_area = tk.Text(master, height=10, state='disabled')
+        self.text_area = tk.Text(master, height=10, state='disabled') # disabled 表示唯讀文字
         self.text_area.pack(pady=10, padx=20, fill="x")
 
         # 按鈕區 (Frame 容器)
-        self.button_frame = tk.Frame(master)
+        self.button_frame = tk.Frame(master) # Frame 一個分區的格子 master 主視窗
         self.button_frame.pack(pady=10)
 
     # UI 方法：更新狀態欄文字
@@ -180,17 +180,17 @@ class GameUI:
 
     # UI 方法：更新劇情文字
     def update_text(self, text):
-        self.text_area.config(state='normal')
+        self.text_area.config(state='normal') # 解除唯獨
         self.text_area.delete('1.0', tk.END)
         self.text_area.insert(tk.END, text + "\n")
-        self.text_area.config(state='disabled')
+        self.text_area.config(state='disabled') # 恢復唯讀
 
     # UI 方法：附加劇情文字
     def append_text(self, text):
         self.text_area.config(state='normal')
         self.text_area.insert(tk.END, text + "\n")
         self.text_area.see(tk.END)  # 滾動到底部
-        self.text_area.config(state='disabled')
+        self.text_area.config(state='disabled') # 恢復唯讀
 
     # UI 方法：動態生成按鈕
     def set_choices(self, choices, handler_function):
