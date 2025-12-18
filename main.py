@@ -148,7 +148,7 @@ class GameManager:
         self.ui.set_choices(["攻擊", "防禦", "逃跑"], self.handle_battle_choice)
 
 # --- 3. View 層: 介面類別 (由介面整合負責人主要實作) ---
-# from PIL import Image, ImageTk  # 需要安裝 Pillow: pip install pillow
+# 圖片顯示工具（PIL）：需安裝 Pillow: pip install pillow
 
 class GameUI:
     def __init__(self, master, game_manager):
@@ -158,8 +158,8 @@ class GameUI:
         self.master.geometry("600x500")  # 稍微加高一點給圖片空間
 
         # 狀態顯示區
-        self.status_label = tk.Label(master, text="HP:", anchor="w", fg="red")
-        self.status_label.pack(pady=(10, 5), padx=20, fill="x")
+        self.status_label = tk.Label(master, text="HP:", anchor="w", fg="red") # w=west
+        self.status_label.pack(pady=(10, 5), padx=20, fill="x") # pad=space
 
         # 圖片顯示區
         self.image_label = tk.Label(master)
