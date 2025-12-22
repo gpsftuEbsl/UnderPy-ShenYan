@@ -1,91 +1,94 @@
 # story/script.py
 
-# 劇情數據模組，使用字典儲存所有對話腳本
-
-# --- 遊戲初始介紹 ---
-INTRO_SCENE = {
-    "id": "INTRO_01",
-    "text": "歡迎來到 UnderPy 的世界。你醒來時，發現自己被困在一個未知的洞穴裡。",
-    "speaker": "旁白",
-    "next": "NPC_MEET"  # 指向下一個劇情段落
-}
-
-# --- 遇到 NPC 的對話 ---
-NPC_MEET = {
-    "id": "NPC_02",
-    "text": "一位看起來很友善的 NPC 站在前方。 '嗨！陌生人，你還好嗎？'",
-    "speaker": "NPC A",
-    "next": "CHOICE_1"  # 指向一個選項
-}
-
-# --- 戰鬥前的對話 ---
-PRE_BATTLE = {
-    "id": "BATTLE_01",
-    "text": "NPC 突然變臉：'抱歉，這是規定！準備好戰鬥吧！'",
-    "speaker": "NPC A",
-    "next_action": "START_BATTLE"  # 特殊指令，告訴 manager.py 啟動 Pygame
-}
-
-# 使用字典儲存選項與分支 (Choices and Branches)
-
-CHOICE_1 = {
-    "id": "CHOICE_01",
-    "text": "你要如何回應這位友善的 NPC？",
-    "speaker": "旁白",
-    "options": [
-        {
-            "text": "1. 友好地打招呼。",
-            "target": "BATTLE_01"  # 選項 1 導向戰鬥
-        },
-        {
-            "text": "2. 保持沉默。",
-            "target": "ENDING_PACIFIST" # 選項 2 導向和平結局（如果選擇製作）
-        }
-    ]
-}
-
-# 儲存結局文本 (Ending Text)
-
-# --- 新增的劇本資料 (可放在 GameManager 外部，讓流程負責人單獨維護) ---
 SCENE_SCRIPT = {
+    # --- 第一層 (原本的) ---
     "START": {
         "text": "你進入了一個地下城。前方出現一隻史萊姆！",
         "choices": {
             "調查": "SLIME_INFO",
-            "戰鬥": "BATTLE_SLIME", # 特殊動作代號
+            "戰鬥 (Pygame)": "BATTLE_SLIME",
             "逃跑": "END_RUN"
         },
-        "image": "assets/images/silme.png" # 圖片檔放在 images/ 目錄下
+        "image": "assets/images/slime.png"
     },
     "SLIME_INFO": {
-        "text": "史萊姆看起來很飢餓。你確認了，這確實是一隻史萊姆。",
+        "text": "史萊姆看起來很飢餓。確實是一隻史萊姆。",
         "choices": {
             "準備戰鬥": "BATTLE_SLIME",
             "偷偷溜走": "END_RUN"
         },
         "image": "assets/images/slime_info.png"
     },
+    # --- 戰鬥勝利後，導向第二層 ---
     "WIN_SLIME": {
-        "text": "你贏了！史萊姆倒下了。你發現了一把生鏽的鑰匙。",
+        "text": "你贏了！史萊姆化成一灘水。你發現通往深處的樓梯。",
         "choices": {
-            "繼續探索": "SCENE_2_ROOM"
+            "前往第二層": "LEVEL_2_GOBLIN"  # 接續到哥布林劇情
         },
-        "image": "assets/images/key.png"
+        "image": None
     },
-    "SCENE_2_ROOM": {
-        "text": "你來到了一扇古老的門前，這似乎是地下城的第二層入口。",
+    
+    # --- 第二層：哥布林劇情開始 ---
+    "LEVEL_2_GOBLIN": {
+        "text": "【第二層：回音洞穴】\n前方出現一隻穿著吊嘎的哥布林！\n哥布林：『喂！你看起來一臉 Bug 很多跑不動的樣子！』\n\n(哥布林發動了嘲諷！你的 HP 減少了 10 點！)",
         "choices": {
-            "用鑰匙開門": "END_WIN",
-            "返回": "START" # 範例: 回到起點
-        }
+            "攻擊他 (閉嘴!)": "GOBLIN_FIGHT_CHOICE",
+            "防禦 (掩耳)": "GOBLIN_DEFEND"
+        },
+        "image": "assets/images/goblin_taunt.png"
     },
-    "END_RUN": {
-        "text": "你成功逃跑了！遊戲結束。",
-        "choices": {}
+    "GOBLIN_DEFEND": {
+        "text": "你試圖摀住耳朵，但哥布林的碎碎念穿透力太強了。\n防禦無效！",
+        "choices": {
+            "攻擊他 (閉嘴!)": "GOBLIN_FIGHT_CHOICE"
+        },
+        "image": "assets/images/goblin_taunt.png"
     },
-    "END_WIN": {
-        "text": "你打開了門，通往更深處的光芒籠罩了你。恭喜你完成了第一階段的探索！",
-        "choices": {}
+    "GOBLIN_FIGHT_CHOICE": {
+        "text": "你受不了了，揮劍砍向哥布林！\n哥布林：『哎唷！君子動口不動手啊！』\n哥布林跪地求饒了。",
+        "choices": {
+            "殺死她": "GOBLIN_KILLED",
+            "放走她": "GOBLIN_SPARED"
+        },
+        "image": "assets/images/goblin_cry.png"
     },
+    
+    # --- 分支 A：殺死 ---
+    "GOBLIN_KILLED": {
+        "text": "你一劍解決了哥布林。世界清靜了。\n但是... 她身上什麼都沒有。你好像錯過了什麼。",
+        "choices": {
+            "前往大門": "LEVEL_2_GATE"
+        },
+        "image": "assets/images/empty_room.png"
+    },
+    
+    # --- 分支 B：放走 (獲得密碼) ---
+    "GOBLIN_SPARED": {
+        "text": "哥布林感動涕零：『大哥你人真好！這是我家大門密碼 9527，送你啦！』\n(系統：你記住了密碼 9527)",
+        "choices": {
+            "前往大門": "LEVEL_2_GATE"
+        },
+        "image": "assets/images/goblin_happy.png"
+    },
+
+    # --- 密碼門 (特殊場景：需要輸入框) ---
+    "LEVEL_2_GATE": {
+        "text": "你來到一扇巨大的石門前。\n門上有個電子鎖，上面寫著：『請輸入通行密碼』",
+        "choices": {}, # 這裡沒有按鈕，因為我們要顯示輸入框
+        "type": "INPUT", # 標記這個場景需要輸入框
+        "image": "assets/images/door_locked.png"
+    },
+    
+    # --- 第三層 (通過後) ---
+    "LEVEL_3_START": {
+        "text": "【系統】密碼正確！大門緩緩打開...\n歡迎來到第三層！",
+        "choices": {
+            "暫時結束": "END_WIN"
+        },
+        "image": "assets/images/door_open.png"
+    },
+    
+    # --- 結局 ---
+    "END_RUN": {"text": "你逃跑了。Game Over。", "choices": {}, "image": None},
+    "END_WIN": {"text": "恭喜通關目前版本！", "choices": {}, "image": None}
 }
-# 戰鬥相關的場景 ID (例如 BATTLE_SLIME) 是特殊動作，由 GameManager 判斷處理。
