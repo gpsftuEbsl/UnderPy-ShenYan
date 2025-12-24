@@ -9,7 +9,7 @@ SCENE_SCRIPT = {
             "戰鬥 (Pygame)": "BATTLE_SLIME",
             "逃跑": "END_RUN"
         },
-        "image": "UnderPy-main\\assets\\images\\silme.png"
+        "image": "assets\images\dungeon.png"
     },
     "SLIME_INFO": {
         "text": "史萊姆看起來很飢餓。確實是一隻史萊姆。",
@@ -17,7 +17,7 @@ SCENE_SCRIPT = {
             "準備戰鬥": "BATTLE_SLIME",
             "偷偷溜走": "END_RUN"
         },
-        "image": "UnderPy-main\\assets\\images\\key.png"
+        "image": "assets\images\silme.png"
     },
     # --- 戰鬥勝利後，導向第二層 ---
     "WIN_SLIME": {
@@ -25,27 +25,19 @@ SCENE_SCRIPT = {
         "choices": {
             "前往第二層": "LEVEL_2_GOBLIN"  # 接續到哥布林劇情
         },
-        "image": None
+        "image": "assets/images/stairs_down.png"
     },
-    
     # --- 第二層：哥布林劇情開始 ---
     "LEVEL_2_GOBLIN": {
-        "text": "【第二層：回音洞穴】\n前方出現一隻穿著吊嘎的哥布林！\n哥布林：『喂！你看起來一臉 Bug 很多跑不動的樣子！』\n\n(哥布林發動了嘲諷！你的 HP 減少了 10 點！)",
+        "text": "【第二層：回音洞穴】\n前方出現一隻穿著吊嘎的哥布林！\n哥布林：『喂！你看起來一臉 Bug 很多跑不動的樣子！』\n\n(系統：哥布林攔住了你，看來不教訓他不行了！)",
         "choices": {
-            "攻擊他 (閉嘴!)": "GOBLIN_FIGHT_CHOICE",
-            "防禦 (掩耳)": "GOBLIN_DEFEND"
+            "進入戰鬥": "START_GOBLIN_BATTLE"  # 這裡標記進入戰鬥迴圈
         },
         "image": "assets/images/goblin_taunt.png"
     },
-    "GOBLIN_DEFEND": {
-        "text": "你試圖摀住耳朵，但哥布林的碎碎念穿透力太強了。\n防禦無效！",
-        "choices": {
-            "攻擊他 (閉嘴!)": "GOBLIN_FIGHT_CHOICE"
-        },
-        "image": "assets/images/goblin_taunt.png"
-    },
-    "GOBLIN_FIGHT_CHOICE": {
-        "text": "你受不了了，揮劍砍向哥布林！\n哥布林：『哎唷！君子動口不動手啊！』\n哥布林跪地求饒了。",
+    # 戰鬥結束後的過渡場景 (哥布林血量歸零後跳轉到這)
+    "GOBLIN_DEFEATED": {
+        "text": "哥布林：『哎唷！君子動口不動手啊！大俠饒命！』\n你手中的劍架在她的脖子上，她已經徹底失去了戰意。",
         "choices": {
             "殺死她": "GOBLIN_KILLED",
             "放走她": "GOBLIN_SPARED"
@@ -89,6 +81,7 @@ SCENE_SCRIPT = {
     },
     
     # --- 結局 ---
-    "END_RUN": {"text": "你逃跑了。Game Over。", "choices": {}, "image": None},
-    "END_WIN": {"text": "恭喜通關目前版本！", "choices": {}, "image": None}
+    "END_RUN": {"text": "你逃跑了。Game Over。", "choices": {}, "image": "assets/images/the_end.png"},
+    "END_LOSE": {"text": "你死了。Game Over。", "choices": {}, "image": "assets/images/the_end.png"},
+    "END_WIN": {"text": "恭喜通關目前版本！", "choices": {}, "image": "assets/images/the_end.png"}
 }
