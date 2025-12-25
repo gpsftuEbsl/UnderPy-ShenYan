@@ -1,3 +1,14 @@
+# main.py
+# 這裡放遊戲的主要邏輯與管理器
+# GameManager類別中重要的函數如下:
+# 1. handle_goblin_combat: 處理哥布林戰鬥選擇
+# 2. enter_goblin_combat_loop: 進入哥布林戰鬥迴圈
+# 3. handle_password_input: 處理密碼輸入框的提交
+# 4. load_scene: 加載並顯示指定場景
+# 5. handle_scene_choice: 處理場景選擇按鈕點擊
+# 6. player_take_damage: 中央受傷系統
+# 7. check_death: 檢查玩家是否死亡 etc.
+
 import tkinter as tk
 from story.script import SCENE_SCRIPT
 from ui.game_ui import GameUI
@@ -35,16 +46,18 @@ class GameManager:
         self.ui.flash_red()
         if message: self.ui.type_text(message, clear=False)
         return self.check_death()
-
+    
     def check_death(self):
+        """ 檢查玩家是否死亡，若死亡則顯示 Game Over 訊息並結束遊戲 """
         if not self.player.is_alive():
             self.ui.hide_input_field()
             self.ui.set_choices([], None)
             self.ui.type_text("\n【系統】你的 HP 歸零了。冒險在此終結... (Game Over)", clear=False)
             return True
         return False
-
+    
     def load_scene(self, scene_id):
+        """ 加載並顯示指定場景 """
         self.current_scene_id = scene_id
         scene = self.script_data.get(scene_id)
         if not scene: return
@@ -58,6 +71,7 @@ class GameManager:
             self.ui.set_choices(list(scene["choices"].keys()), self.handle_scene_choice)
 
     def handle_scene_choice(self, choice):
+        """ 處理場景選擇按鈕點擊 """
         next_action = self.script_data[self.current_scene_id]["choices"].get(choice)
         if not next_action: return
 
@@ -85,11 +99,12 @@ class GameManager:
         else: self.load_scene(next_action)
         if self.check_death(): return # 死亡檢查
 
-    # --- 哥布林戰鬥迴圈 ---
     def enter_goblin_combat_loop(self):
-        self.ui.set_choices(["攻擊", "防禦"], self.handle_goblin_combat)
+        """ 進入哥布林戰鬥迴圈 """
+        self.ui.set_choices(["攻擊", "防禦"], self.handle_goblin_combat) # 呼叫戰鬥選擇處理函式
 
     def handle_goblin_combat(self, action):
+        """ 處理哥布林戰鬥選擇 """
         logs = []
         if action == "攻擊":
             logs.append(self.player.attack(self.current_enemy))
@@ -110,10 +125,10 @@ class GameManager:
             self.ui.shake_window()
 
         if self.check_death(): return
-        self.enter_goblin_combat_loop()
+        self.enter_goblin_combat_loop() # 呼叫下一輪戰鬥
 
-    # --- 密碼輸入 ---
     def handle_password_input(self, val):
+        """ 處理密碼輸入框的提交 """
         msgs = [f"你輸入了：{(val if val else '啥都沒有')}"]
         if val == "9527":
             msgs.append("【系統】密碼正確！大門緩緩打開...")

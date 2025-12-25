@@ -1,3 +1,6 @@
+# ui/game_ui.py
+# 這裡專門拿來放遊戲介面相關的程式碼
+
 import tkinter as tk
 from functools import partial
 from PIL import Image, ImageTk 
