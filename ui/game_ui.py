@@ -126,7 +126,7 @@ class GameUI:
                 btn.pack(side="left", padx=15)
 
     # --- 特效功能 ---
-    def type_text(self, text, speed=25, clear=True):
+    def type_text(self, text, speed=80, clear=True):
         if self.typing_job is not None:
             self.master.after_cancel(self.typing_job)
         self.text_area.config(state='normal')
