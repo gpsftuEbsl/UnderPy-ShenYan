@@ -21,16 +21,16 @@ class GameUI:
         
         # --- 美化與字體設定 ---
         self.colors = {
-            "bg_main": "#2C3E50", "bg_text": "#34495E", "fg_text": "#ECF0F1",
-            "fg_accent": "#E74C3C", "btn_bg": "#2980B9", "btn_fg": "#FFFFFF",
-            "btn_hover": "#3498DB", "input_bg": "#ECF0F1", "input_fg": "#2C3E50"
+            "bg_main": "#000000", "bg_text": "#1A2935", "fg_text": "#ECF0F1",
+            "fg_accent": "#E74C3C", "btn_bg": "#1A2935", "btn_fg": "#FFFFFF",
+            "btn_hover": "#434343", "input_bg": "#ECF0F1", "input_fg": "#2C3E50"
         }
         
         self.fonts = {
             "main": ("Microsoft JhengHei", 18),
             "mono": ("Consolas", 16),
-            "bold": ("Microsoft JhengHei", 20, "bold"),
-            "status": ("Impact", 32)
+            "bold": ("Microsoft JhengHei", 16, "bold"),
+            "status": ("Impact", 20)
         }
 
         self.master.configure(bg=self.colors["bg_main"])
@@ -129,7 +129,7 @@ class GameUI:
                 btn.pack(side="left", padx=15)
 
     # --- 特效功能 ---
-    def type_text(self, text, speed=70, clear=True):
+    def type_text(self, text, speed=60, clear=True):
         if self.typing_job is not None:
             self.master.after_cancel(self.typing_job)
         self.text_area.config(state='normal')

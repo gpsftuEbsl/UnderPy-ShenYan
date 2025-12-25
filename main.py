@@ -165,9 +165,9 @@ class GameManager:
                 # 答錯扣血
                 self.puzzle_current = [] # 重置順序
                 msg = "【系統】嗶嗶！順序錯誤！機關發出了強烈的電擊！"
-                if self.player_take_damage(10, msg):
+                if self.player_take_damage(45, msg):
                     return
-                self.ui.type_text("\n(順序已重置，請重新開始。)", clear=False)
+                self.ui.type_text("\n可惡失敗了...\n失敗為成功之母，再逝逝好了", clear=False)
 
     # ==========================================
     # ★★★ Level 2: 哥布林戰鬥迴圈 ★★★

@@ -33,8 +33,9 @@ SCENE_SCRIPT = {
     # ==========================================
     # ★ 第二層：哥布林與密碼門 (保持不變)
     # ==========================================
+    # TODO: 獨立出哥布林資訊場景 並且所有受傷特效需再哥布林攻擊後觸發
     "LEVEL_2_GOBLIN": {
-        "text": "【第二層：回音洞穴】\n前方出現一隻穿著吊嘎的深綠色哥布林！\n哥布林：『喂！你看起來一臉 Bug 很多跑不動的樣子！』\n\n(哥布林攔住了你，看來不教訓他不行了！)",
+        "text": "【第二層：回音洞穴】【哥布林嘲諷：HP下降】【哥布HP：45】\n哥布林：『喂！你看起來一臉 Bug 很多跑不動的樣子！』\n前方出現一隻穿著吊嘎的深綠色哥布林！\n(哥布林攔住了你，看來不教訓他不行了！)",
         "choices": {
             "進入戰鬥": "START_GOBLIN_BATTLE"
         },
@@ -90,6 +91,7 @@ SCENE_SCRIPT = {
             "返回大廳": "LEVEL_3_START"
         },
         "image": "assets/images/black_door_closed.png"
+        # "image": "assets/images/black_door_closed.png" # TODO: 製作門打開後的圖片
     },
 
     # --- 房間 2：線索畫作 ---
@@ -108,7 +110,7 @@ SCENE_SCRIPT = {
             "█": "PUSH_SQUARE",
             "◯": "PUSH_CIRCLE",
             "△": "PUSH_TRIANGLE",
-            "掉頭": "LEVEL_3_START"
+            "放棄": "LEVEL_3_START"
         },
         "type": "PUZZLE", # 標記為謎題模式
         "image": "assets/images/dark_puzzle_room.png"
