@@ -21,8 +21,8 @@ class GameUI:
         
         # --- 美化與字體設定 ---
         self.colors = {
-            "bg_main": "#000000", "bg_text": "#1A2935", "fg_text": "#ECF0F1",
-            "fg_accent": "#E74C3C", "btn_bg": "#1A2935", "btn_fg": "#FFFFFF",
+            "bg_main": "#000000", "bg_text": "#121D25", "fg_text": "#ECF0F1",
+            "fg_accent": "#E74C3C", "btn_bg": "#121D25", "btn_fg": "#FFFFFF",
             "btn_hover": "#434343", "input_bg": "#ECF0F1", "input_fg": "#2C3E50"
         }
         
