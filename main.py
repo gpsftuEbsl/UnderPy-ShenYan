@@ -4,36 +4,36 @@
 import tkinter as tk
 from story.script import SCENE_SCRIPT
 from ui.game_ui import GameUI
-
-# --- Pygame 戰鬥模組 ---
-# 電腦沒裝 pygame 會直接閃退，所以加個 try except
-# 如果沒裝就跑下面的假戰鬥函式
-try:
-    from battle.battle_game import boss_battle
-except ImportError:
-    def boss_battle(): 
-        print("【測試模式】找不到 Pygame，自動判定勝利")
-        return "WIN"
+from battle.battle_game import boss_battle # 沒裝 pygame 可能會直接閃退
 
 # --- 角色類別 ---
 class Character:
+    """
+    Character 的 Docstring
+
+    代表遊戲中的一個角色 (玩家或敵人)
+    """
     def __init__(self, name, hp, atk):
-        # 習慣把屬性一個一個列出來，比較清楚
+        # 實體變數
         self.name = name
         self.max_hp = hp
         self.hp = hp
-        self.atk = atk
+        self.atk = atk # 攻擊力
         
     def is_alive(self): 
         # 只要血量大於 0 就是活著
         return self.hp > 0
         
     def attack(self, target):
+        """
+        執行攻擊動作\n
+        :param self: 攻擊者 (Character 物件)
+        :param target: 被攻擊的目標 (Character 物件)
+        """
         damage = self.atk
         # 扣血邏輯
         target.hp = target.hp - damage
-        
-        # 這裡原本用 max(0, ...)，但寫 if 判斷可讀性或許較好?
+
         # 防止血量變成負數
         if target.hp < 0:
             target.hp = 0
@@ -42,20 +42,34 @@ class Character:
 
 # --- 遊戲管理器 ---
 class GameManager:
+    """
+    遊戲邏輯管理器 (GameManager)
+    
+    負責處理所有劇情跳轉、數值計算、解謎邏輯與戰鬥流程，
+    並根據邏輯判斷控制 UI 做出對應的變化。
+
+    :param ui: 遊戲介面實例 (GameUI 類別的物件)
+    """
     def __init__(self, ui):
         self.ui = ui
         self.player = Character("勇者", 100, 15)
-        self.current_enemy = None 
+        self.current_enemy = None # Character 物件
         self.script_data = SCENE_SCRIPT
         self.current_scene_id = "START"
-        self.known_password = None 
+        self.known_password = None # 玩家是否知道密碼 在後面開門時判斷邏輯(提示時)會用到
         
         # --- Level 3 解謎設定 ---
         self.puzzle_answer = ["◯", "△", "█"]
         self.puzzle_current = []
 
     def start_game(self):
-        """ 遊戲剛開始的初始化 """
+        """
+        遊戲剛開始的初始化
+        
+        從這裡開始載入第一個場景
+
+        參數：無
+        """
         self.player.hp = self.player.max_hp
         self.ui.update_status(f"HP: {self.player.hp}/{self.player.max_hp}")
         self.load_scene("START")
@@ -66,7 +80,7 @@ class GameManager:
         傳回值：如果死亡回傳 True，沒死回傳 False
         參數：
         - amount: 受傷數值
-        - message: 受傷後要顯示的訊息(可選)(使用: self.ui.type_text(message, clear=False))
+        - message: 受傷後要顯示的訊息(可選)(使用: .ui.type_text(message, clear=False))
         """
         self.player.hp = self.player.hp - amount
         
@@ -80,7 +94,7 @@ class GameManager:
         self.ui.shake_window()
         self.ui.flash_red()
         
-        if message: 
+        if message: # 如果player_take_damage的同時有傳訊息就顯示
             self.ui.type_text(message, clear=False)
             
         return self.check_death()
@@ -98,14 +112,15 @@ class GameManager:
     
     def load_scene(self, scene_id):
         """
-        載入場景資料並更新 UI\n
-        (包含輸入框圖片與選項)\n
-        有用到呼叫: self.ui.set_choices(choices_list, self.handle_scene_choice)
+        載入場景資料並更新 UI
+
+        (包含輸入框圖片與選項)
+
+        :param scene_id: 場景 ID 字串
         """
-        self.current_scene_id = scene_id
+        self.current_scene_id = scene_id # 將實體變數設定為傳入的 scene_id
         
-        # 從劇本字典抓資料
-        scene = self.script_data.get(scene_id)
+        scene = self.script_data.get(scene_id) # 從劇本字典抓資料
         if scene is None:
             return
         
@@ -113,23 +128,25 @@ class GameManager:
         self.ui.update_image(scene.get("image"))
         
         # 判斷是不是要顯示輸入框
-        if scene.get("type") == "INPUT":
+        if scene.get("type") == "INPUT": # 如果是輸入框場景
             self.ui.show_input_field()
-            self.ui.set_choices([], None)
+            self.ui.set_choices([], None) # 清空按鈕
         else:
             self.ui.hide_input_field()
             # 先把 keys 轉成 list 存起來，不然有時候傳進去會報錯，這樣也比較好 debug
             choices_list = list(scene["choices"].keys())
-            self.ui.set_choices(choices_list, self.handle_scene_choice)
+            self.ui.set_choices(choices_list, self.handle_scene_choice) # 傳入ui的按鈕處理函式
 
     def handle_scene_choice(self, choice):
         """
-        按鈕被點擊時會執行這裡
-        一些特殊邏輯也會在這裡處理
-        """
-        current_scene_data = self.script_data.get(self.current_scene_id)
+        按鈕被點擊時會執行這裡，一些特殊邏輯也會在這裡處理
         
-        # 查表找下一個場景 ID
+        :param self: GameManager 物件
+        :param choice: 玩家選擇的選項文字
+        """
+        current_scene_data = self.script_data.get(self.current_scene_id) # 找出劇情字典id
+        
+        # 找出choice裡面的下一個場景的id
         next_action = current_scene_data["choices"].get(choice)
         
         # --- Level 3 謎題特殊判斷 ---
@@ -180,10 +197,10 @@ class GameManager:
         self.check_death()
 
     # ==========================================
-    #  Level 3: 解謎邏輯
+    #  Level 3: 解謎邏輯 TODO: 之後可以重新命名同level的函式 或做成類別
     # ==========================================
     
-    # 這裡因為 after 不能直接塞有參數的函式，所以寫一個獨立的函式來呼叫比較簡單
+    # 因為 after 不能直接塞有參數的函式，所以寫一個獨立的函式來呼叫
     def _delayed_puzzle_success(self):
         self.load_scene("L3_UNLOCK_SUCCESS")
 
@@ -209,7 +226,7 @@ class GameManager:
                     self.ui.type_text("\n可惡失敗了...\n失敗為成功之母，再逝逝好了", clear=False)
 
     # ==========================================
-    #  Level 2: 哥布林戰鬥迴圈
+    #  Level 2: 哥布林戰鬥迴圈 TODO: 之後可以重新命名同level的函式 或做成類別
     # ==========================================
     def enter_goblin_combat_loop(self):
         self.ui.set_choices(["攻擊", "防禦"], self.handle_goblin_combat)
@@ -251,7 +268,7 @@ class GameManager:
         self.enter_goblin_combat_loop()
 
     # ==========================================
-    #  Level 2: 密碼輸入
+    #  Level 2: 密碼輸入 TODO: 之後可以重新命名同level的函式 或做成類別
     # ==========================================
     
     # 這個也是為了 after 寫的延遲函式
@@ -270,7 +287,7 @@ class GameManager:
             self.ui.type_text("\n".join(msgs), clear=False)
             self.ui.hide_input_field()
             
-            # 延遲跳轉
+            # 用after方法延遲跳轉
             self.ui.master.after(1500, self._delayed_level_3_start)
         else:
             if self.player_take_damage(5): return
@@ -286,8 +303,8 @@ class GameManager:
 
 if __name__ == '__main__':
     root = tk.Tk()
-    mgr = GameManager(None)
-    ui = GameUI(root, mgr)
-    mgr.ui = ui
+    mgr = GameManager(None) # 先建立 GameManager 物件，並傳 None，避免循環引用
+    ui = GameUI(root, mgr) # 再建立 UI 物件
+    mgr.ui = ui # 把 UI 傳回給管理器
     mgr.start_game()
-    root.mainloop()
+    root.mainloop() # 啟動 Tkinter 主迴圈 隨時待使用者互動

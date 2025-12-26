@@ -3,10 +3,17 @@
 
 import tkinter as tk
 from functools import partial
-from PIL import Image, ImageTk 
-import random 
+from PIL import Image, ImageTk
 
 class GameUI:
+    """
+    GameUI 的 Docstring
+
+    負責遊戲介面的顯示與互動
+
+    :param master: 主視窗物件 (tk.Tk)
+    :param game_manager: 遊戲管理器物件 (GameManager)
+    """
     def __init__(self, master, game_manager):
         self.master = master
         self.game = game_manager
@@ -93,6 +100,13 @@ class GameUI:
 
     # --- 全螢幕與基礎功能 ---
     def toggle_fullscreen(self, event=None):
+        """
+        toggle_fullscreen 的 Docstring
+        
+        :param self: GameUI 物件
+        :param event: 事件物件 (預設為 None)
+        切換全螢幕模式
+        """
         is_fullscreen = self.master.attributes("-fullscreen")
         self.master.attributes("-fullscreen", not is_fullscreen)
         self.main_container.place(relx=0, rely=0, relwidth=1, relheight=1)
@@ -103,6 +117,12 @@ class GameUI:
         self.main_container.place(relx=0, rely=0, relwidth=1, relheight=1)
 
     def update_status(self, text):
+        """
+        update_status 的 Docstring
+        
+        :param self: GameUI 物件
+        :param text: 狀態文字
+        """
         self.status_label.config(text=text)
 
     def update_image(self, image_path=None):
@@ -118,6 +138,13 @@ class GameUI:
             self.image_label.config(image="", width=1, height=1)
 
     def set_choices(self, choices, handler_function):
+        """
+        set_choices 的 Docstring
+        
+        :param self: GameUI 物件
+        :param choices: 選項清單
+        :param handler_function: 選項處理函式
+        """
         for widget in self.button_frame.winfo_children(): widget.destroy()
         if choices:
             inner = tk.Frame(self.button_frame, bg=self.colors["bg_main"])
@@ -130,6 +157,16 @@ class GameUI:
 
     # --- 特效功能 ---
     def type_text(self, text, speed=60, clear=True):
+        """
+        type_text 的 Docstring
+
+        以打字機效果顯示文字
+        
+        :param self: GameUI 物件
+        :param text: 要打字的文字
+        :param speed: 打字速度 (毫秒)
+        :param clear: 是否清除現有文字
+        """
         if self.typing_job is not None:
             self.master.after_cancel(self.typing_job)
         self.text_area.config(state='normal')
@@ -138,6 +175,16 @@ class GameUI:
         self._type_next_char(text + "\n", 0, speed)
 
     def _type_next_char(self, text, index, speed):
+        """
+        _type_next_char 的 Docstring
+
+        內部遞迴函式，用於逐字顯示文字
+        
+        :param self: GameUI 物件
+        :param text: 完整文字
+        :param index: 當前索引
+        :param speed: 打字速度 (毫秒)
+        """
         if index < len(text):
             char = text[index]
             self.text_area.config(state='normal')
@@ -157,6 +204,11 @@ class GameUI:
             ))
 
     def flash_red(self):
+        """
+        受到傷害時畫面閃紅特效
+        
+        :param self: GameUI 物件
+        """
         old = self.colors["bg_main"]
         targets = [self.master, self.main_container, self.text_frame, self.status_frame, self.button_frame]
         for f in targets: f.configure(bg="#E74C3C")
@@ -166,13 +218,17 @@ class GameUI:
         targets = [self.master, self.main_container, self.text_frame, self.status_frame, self.button_frame]
         for f in targets: f.configure(bg=bg)
 
-    # --- 輸入框控制 (關鍵修正) ---
+    # --- 輸入框控制 (已修正顯示問題) ---
     def show_input_field(self):
+        """顯示輸入框"""
         # 修正：排在 text_frame 後面，而不是 text_area 後面
         self.input_frame.pack(pady=20, after=self.text_frame)
         self.entry_field.focus()
 
     def hide_input_field(self):
+        """
+        影藏密碼輸入區 要用的時候再顯示
+        """
         self.input_frame.pack_forget()
 
     def submit_password(self):
