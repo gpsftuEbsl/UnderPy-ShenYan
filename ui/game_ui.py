@@ -60,7 +60,7 @@ class GameUI:
         )
         self.status_label.pack(side="left")
         
-        # 右邊：提示文字 (修正：改用 self.hint_label 避免變數名稱衝突)
+        # 右邊：提示文字
         self.hint_label = tk.Label(
             self.status_frame, text="press ESC to close", font=self.fonts["status"],
             bg=self.colors["bg_main"], fg=self.colors["fg_accent"], anchor="e"
@@ -75,7 +75,7 @@ class GameUI:
         self.current_image = None 
 
         # --- 3. 劇情文字區 ---
-        # 這裡移除 expand=True，改用固定高度，確保下方空間
+        # 固定高度，確保下方空間
         self.text_frame = tk.Frame(self.main_container, bg=self.colors["bg_main"])
         self.text_frame.pack(pady=10, padx=50, fill="x") # 移除 expand，改用 fill="x"
 
