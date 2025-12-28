@@ -21,7 +21,9 @@ class GameUI:
         
         # --- 全螢幕與視窗設定 ---
         self.master.attributes("-fullscreen", True)
-        self.master.bind("<Escape>", self.exit_fullscreen)
+        
+        # 修改：將 Esc 鍵綁定到退出程式
+        self.master.bind("<Escape>", self.on_exit) 
         self.master.bind("<F11>", self.toggle_fullscreen)
         
         self.typing_job = None 
@@ -49,11 +51,20 @@ class GameUI:
         # --- 1. 狀態顯示區 ---
         self.status_frame = tk.Frame(self.main_container, bg=self.colors["bg_main"])
         self.status_frame.pack(fill="x", pady=(40, 5), padx=50) 
+        
+        # 左邊：HP 狀態 (保持變數名稱為 self.status_label)
         self.status_label = tk.Label(
             self.status_frame, text="HP: 100/100", font=self.fonts["status"],
             bg=self.colors["bg_main"], fg=self.colors["fg_accent"], anchor="w"
         )
         self.status_label.pack(side="left")
+        
+        # 右邊：提示文字 (修正：改用 self.hint_label 避免變數名稱衝突)
+        self.hint_label = tk.Label(
+            self.status_frame, text="press ESC to close", font=self.fonts["status"],
+            bg=self.colors["bg_main"], fg=self.colors["fg_accent"], anchor="e"
+        )
+        self.hint_label.pack(side="right")
 
         # --- 2. 圖片顯示區 ---
         self.image_frame = tk.Frame(self.main_container, bg="black", bd=2, relief="sunken")
@@ -90,8 +101,8 @@ class GameUI:
         self.entry_field.pack(side="left", padx=10, ipady=8)
         
         self.confirm_btn = tk.Button(self.input_frame, text="確認送出", command=self.submit_password,
-                                    font=self.fonts["bold"], bg=self.colors["fg_accent"], fg="white",
-                                    relief="flat", cursor="hand2", padx=20, pady=5)
+                                     font=self.fonts["bold"], bg=self.colors["fg_accent"], fg="white",
+                                     relief="flat", cursor="hand2", padx=20, pady=5)
         self.confirm_btn.pack(side="left", padx=5)
 
         # --- 5. 按鈕區 ---
@@ -111,10 +122,13 @@ class GameUI:
         self.master.attributes("-fullscreen", not is_fullscreen)
         self.main_container.place(relx=0, rely=0, relwidth=1, relheight=1)
 
-    def exit_fullscreen(self, event=None):
-        self.master.attributes("-fullscreen", False)
-        self.master.geometry("1000x800")
-        self.main_container.place(relx=0, rely=0, relwidth=1, relheight=1)
+    # 新增：退出遊戲的函式
+    def on_exit(self, event=None):
+        """
+        關閉遊戲視窗
+        :param event: Tkinter 觸發事件時會自動傳入
+        """
+        self.master.destroy()
 
     def update_status(self, text):
         """
@@ -123,6 +137,8 @@ class GameUI:
         :param self: GameUI 物件
         :param text: 狀態文字
         """
+        # 因為前面把提示文字改成 self.hint_label 了
+        # 這裡的 self.status_label 依然是指向左邊的 HP 血條，功能正常
         self.status_label.config(text=text)
 
     def update_image(self, image_path=None):
