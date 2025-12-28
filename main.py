@@ -59,8 +59,10 @@ class GameManager:
         self.script_data = SCENE_SCRIPT
         self.current_scene_id = "START"
         self.known_password = None # 玩家是否知道密碼 在後面開門時判斷邏輯(提示時)會用到
-        self.loop_count = 0        # 輪迴次數，預設為 0
         
+        # 紀錄是否打贏過 Boss (True/False)
+        self.has_beaten_boss = False 
+
         # --- Level 3 解謎設定 ---
         self.puzzle_answer = ["◯", "△", "█"]
         self.puzzle_current = []
@@ -76,19 +78,20 @@ class GameManager:
         self.player.hp = self.player.max_hp
         self.ui.update_status(f"HP: {self.player.hp}/{self.player.max_hp}")
         
-        # 遊戲啟動時先嘗試讀看看有沒有輪迴紀錄
-        self.check_loop_status()
+        # 遊戲開始前，先檢查是否有「通關證明」
+        # 只讀取 has_beaten_boss 狀態，不讀取進度(位置/血量)
+        self.check_global_status()
         
         self.load_scene("START")
 
-    def check_loop_status(self):
-        """ 檢查是否有輪迴紀錄，但不載入 HP 等狀態 """
+    def check_global_status(self):
+        """ 只檢查是否有通關紀錄，不載入其他存檔 """
         if os.path.exists("savefile.json"):
             try:
                 with open("savefile.json", "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    # 只讀取輪迴次數，不讀取進度
-                    self.loop_count = data.get("loop_count", 0)
+                    # 讀取是否通關過，預設是 False
+                    self.has_beaten_boss = data.get("has_beaten_boss", False)
             except:
                 pass
 
@@ -139,29 +142,26 @@ class GameManager:
         :param scene_id: 場景 ID 字串
         """
         
-        # ---  輪迴判定邏輯 ---
-        # 如果原本要載入 START，且已經有輪迴次數，就偷偷把 ID 換成 START_LOOP
-        # 這樣就不用在 main.py 裡面寫死文字了
+        # --- 判斷特殊劇情觸發 ---
+        # 如果要載入的是 START，且玩家已經打贏過 Boss
         target_scene_id = scene_id
-        if scene_id == "START" and self.loop_count > 0:
-            # 確保 script 裡真的有這個 key，不然會報錯
+        if scene_id == "START" and self.has_beaten_boss:
+            # 嘗試切換到 START_LOOP
             if "START_LOOP" in self.script_data:
                 target_scene_id = "START_LOOP"
 
-        self.current_scene_id = target_scene_id # 更新當前場景 ID
+        self.current_scene_id = target_scene_id # 將實體變數設定為確認後的 ID
         
         scene = self.script_data.get(target_scene_id) # 從劇本字典抓資料
         if scene is None:
-            print(f"找不到場景 ID: {target_scene_id}") # Debug 用
-            return
+            # 如果找不到 START_LOOP，就切回 START
+            if target_scene_id == "START_LOOP":
+                scene = self.script_data.get("START")
+                self.current_scene_id = "START"
+            else:
+                return
         
-        # ---  處理文字內的變數 ({loop_count}) ---
-        display_text = scene["text"]
-        # 如果文字裡有 {loop_count} 這種格式，就自動填入數字
-        if "{loop_count}" in display_text:
-            display_text = display_text.format(loop_count=self.loop_count)
-
-        self.ui.type_text(display_text, clear=True)
+        self.ui.type_text(scene["text"], clear=True)
         self.ui.update_image(scene.get("image"))
         
         # 判斷是不是要顯示輸入框
@@ -173,10 +173,10 @@ class GameManager:
             # 先把 keys 轉成 list 存起來
             choices_list = list(scene["choices"].keys())
 
-            # --- 如果在 初始場景 且有存檔，動態加入「刪除存檔」按鈕 ---
-            # 這裡要判斷 START 或 START_LOOP 都可以顯示
+            # --- 如果有存檔檔案，就在 START 畫面加入刪除選項 ---
+            # 判斷是否在初始畫面 (START 或 START_LOOP) 且檔案存在
             if target_scene_id in ["START", "START_LOOP"] and os.path.exists("savefile.json"):
-                choices_list.append("刪除存檔")
+                choices_list.append("刪除所有紀錄")
 
             self.ui.set_choices(choices_list, self.handle_scene_choice) # 傳入ui的按鈕處理函式
 
@@ -188,9 +188,9 @@ class GameManager:
         :param choice: 玩家選擇的選項文字
         """
         
-        # --- [新功能] 優先處理刪除存檔指令 ---
-        if choice == "刪除存檔":
-            self.delete_save()
+        # --- 處理刪除存檔 ---
+        if choice == "刪除所有紀錄":
+            self.delete_all_save()
             return
 
         current_scene_data = self.script_data.get(self.current_scene_id) # 找出劇情字典id
@@ -208,15 +208,19 @@ class GameManager:
             return
         # ===========================
 
-        # --- 處理結局與輪迴邏輯 ---
-        # 假設 END_WIN 是你原本 script 裡的通關代號
+        # --- 處理結局與通關邏輯 ---
         if next_action == "END_WIN":
-            self.loop_count += 1
-            # 存檔，記錄這次輪迴
+            # 1. 標記已通關
+            self.has_beaten_boss = True
+            
+            # 2. 我們希望重開遊戲時能觸發特殊劇情，所以這裡可以選擇：
+            #    直接存檔 (紀錄 has_beaten_boss=True)，但把場景設回 START
+            self.current_scene_id = "START" 
+            self.player.hp = self.player.max_hp # 補滿血方便下一輪
             self.save_game() 
             
-            # 強制跳轉回 START (load_scene 會自動把它轉成 START_LOOP)
-            self.ui.type_text("\n\n【系統】g4ru,45/y94tj/6yj3... 你的意識被nj/4cjo6m062u03...", clear=False)
+            # 3. 顯示通關訊息並跳轉回標題
+            self.ui.type_text("\n\n【系統】通關紀錄已保存。命運的齒輪開始轉動...", clear=False)
             self.ui.master.after(3000, lambda: self.load_scene("START"))
             return
 
@@ -388,7 +392,7 @@ class GameManager:
             "hp": self.player.hp,
             "scene": self.current_scene_id,
             "known_password": self.known_password,
-            "loop_count": self.loop_count # 紀錄輪迴次數
+            "has_beaten_boss": self.has_beaten_boss # 紀錄是否通關過
         }
         
         try:
@@ -413,7 +417,7 @@ class GameManager:
             self.player.hp = data.get("hp", 100)
             self.current_scene_id = data.get("scene", "START")
             self.known_password = data.get("known_password")
-            self.loop_count = data.get("loop_count", 0) # 恢復輪迴次數
+            self.has_beaten_boss = data.get("has_beaten_boss", False) # 恢復通關狀態
             
             # 更新畫面
             self.ui.update_status(f"HP: {self.player.hp}/{self.player.max_hp}")
@@ -423,15 +427,14 @@ class GameManager:
         except Exception as e:
             self.ui.type_text(f"\n【系統】讀檔檔案損毀或格式錯誤：{e}", clear=False)
 
-    def delete_save(self):
-        """ 刪除存檔 """
+    def delete_all_save(self):
+        """ 刪除存檔並重置 """
         if os.path.exists("savefile.json"):
             try:
                 os.remove("savefile.json")
+                self.has_beaten_boss = False # 重置記憶
                 self.ui.type_text("\n【系統】存檔已刪除！", clear=False)
                 
-                # 刪除後要重置一些變數，不然如果按讀取會報錯
-                self.loop_count = 0 
                 # 重新載入 START 場景來刷新按鈕 (把刪除按鈕藏起來)
                 self.ui.master.after(1000, lambda: self.load_scene("START"))
             except Exception as e:
