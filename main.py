@@ -6,17 +6,7 @@ import json # 用於存檔
 import os   # 用於檢查檔案是否存在
 from story.script import SCENE_SCRIPT
 from ui.game_ui import GameUI
-
-# --- 嘗試匯入戰鬥模組 (包含 Final Boss) ---
-try:
-    from battle.battle_game import boss_battle, final_boss_battle # 沒裝 pygame 可能會直接閃退
-except ImportError:
-    def boss_battle(): 
-        print("【測試模式】未找到 Pygame，預設勝利")
-        return "WIN"
-    def final_boss_battle():
-        print("【測試模式】未找到 Pygame (Final Boss)，預設勝利")
-        return "WIN"
+from battle.battle_game import boss_battle, final_boss_battle # 沒裝 pygame 可能會直接閃退
 
 # --- 角色類別 ---
 class Character:
@@ -232,7 +222,7 @@ class GameManager:
     #  Level 3: 解謎邏輯 TODO: 之後可以重新命名同level的函式 或做成類別 (目前code還沒有很長所以先不做)
     # ==========================================
     
-    # 因為 after 不能直接塞有參數的函式，所以寫一個獨立的函式來呼叫(可以用 lambda 但先這樣寫)
+    # 因為 after 不能直接塞有參數的函式，所以寫一個獨立的函式來呼叫
     def _delayed_puzzle_success(self):
         self.load_scene("L3_UNLOCK_SUCCESS")
 
