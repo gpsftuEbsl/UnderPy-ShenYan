@@ -212,7 +212,7 @@ def final_boss_battle():
     heart = Heart()
     bullets = []
     frame = 0
-    TOTAL_TIME = 60 # set 60 (harder difficulty)
+    TOTAL_TIME = 43 # set 45 (>50 我覺得太難了)
 
     while True:
         clock.tick(FPS)

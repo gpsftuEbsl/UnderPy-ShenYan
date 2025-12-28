@@ -145,19 +145,25 @@ class GameManager:
         # --- 判斷特殊劇情觸發 ---
         # 如果要載入的是 START，且玩家已經打贏過 Boss
         target_scene_id = scene_id
-        if scene_id == "START" and self.has_beaten_boss:
-            # 嘗試切換到 START_LOOP
-            if "START_LOOP" in self.script_data:
+        
+        if self.has_beaten_boss:
+            if scene_id == "START" and "START_LOOP" in self.script_data:
                 target_scene_id = "START_LOOP"
+            # [新功能] 如果進入 Boss 前奏，且已通關過，切換到真相篇
+            elif scene_id == "BOSS_PRELUDE" and "BOSS_PRELUDE_LOOP" in self.script_data:
+                target_scene_id = "BOSS_PRELUDE_LOOP"
 
         self.current_scene_id = target_scene_id # 將實體變數設定為確認後的 ID
         
         scene = self.script_data.get(target_scene_id) # 從劇本字典抓資料
         if scene is None:
-            # 如果找不到 START_LOOP，就切回 START
+            # 防呆：如果找不到特殊場景，就切回原本的
             if target_scene_id == "START_LOOP":
                 scene = self.script_data.get("START")
                 self.current_scene_id = "START"
+            elif target_scene_id == "BOSS_PRELUDE_LOOP":
+                scene = self.script_data.get("BOSS_PRELUDE")
+                self.current_scene_id = "BOSS_PRELUDE"
             else:
                 return
         
@@ -208,6 +214,13 @@ class GameManager:
             return
         # ===========================
 
+        # --- [新功能] 真結局觸發 ---
+        if next_action == "TRUE_END":
+            # 玩家選擇刪除世界，直接刪檔，並進入真結局畫面
+            self.delete_all_save() 
+            self.load_scene("TRUE_END")
+            return
+
         # --- 處理結局與通關邏輯 ---
         if next_action == "END_WIN":
             # 1. 標記已通關
@@ -253,7 +266,11 @@ class GameManager:
             self.ui.master.deiconify() 
             
             if res == "WIN":
-                self.load_scene("BOSS_WIN")
+                # [新功能] 判斷是否為二周目
+                if self.has_beaten_boss:
+                    self.load_scene("BOSS_WIN_LOOP") # 進入真結局路線
+                else:
+                    self.load_scene("BOSS_WIN")      # 進入普通結局路線
             elif res == "LOSE":
                 self.load_scene("END_LOSE")
 
@@ -399,7 +416,7 @@ class GameManager:
             with open("savefile.json", "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
             
-            self.ui.type_text("\n【系統】進度已儲存！(寫入 savefile.json)", clear=False)
+            self.ui.type_text("\n【系統】進度已儲存！", clear=False)
         except Exception as e:
             self.ui.type_text(f"\n【系統】存檔失敗：{e}", clear=False)
 
@@ -433,7 +450,7 @@ class GameManager:
             try:
                 os.remove("savefile.json")
                 self.has_beaten_boss = False # 重置記憶
-                self.ui.type_text("\n【系統】存檔已刪除！", clear=False)
+                self.ui.type_text("\n【系統】存檔已刪除！世界線已重置。", clear=False)
                 
                 # 重新載入 START 場景來刷新按鈕 (把刪除按鈕藏起來)
                 self.ui.master.after(1000, lambda: self.load_scene("START"))
