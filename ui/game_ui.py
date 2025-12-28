@@ -181,7 +181,7 @@ class GameUI:
                 btn.pack(side="left", padx=15)
 
     # --- 特效功能 ---
-    def type_text(self, text, speed=60, clear=True):
+    def type_text(self, text, speed=40, clear=True):
         """
         type_text 的 Docstring
 
