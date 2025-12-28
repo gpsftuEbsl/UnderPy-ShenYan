@@ -51,11 +51,20 @@ class GameUI:
         # --- 1. 狀態顯示區 ---
         self.status_frame = tk.Frame(self.main_container, bg=self.colors["bg_main"])
         self.status_frame.pack(fill="x", pady=(40, 5), padx=50) 
+        
+        # 左邊：HP 狀態 (保持變數名稱為 self.status_label)
         self.status_label = tk.Label(
             self.status_frame, text="HP: 100/100", font=self.fonts["status"],
             bg=self.colors["bg_main"], fg=self.colors["fg_accent"], anchor="w"
         )
         self.status_label.pack(side="left")
+        
+        # 右邊：提示文字 (修正：改用 self.hint_label 避免變數名稱衝突)
+        self.hint_label = tk.Label(
+            self.status_frame, text="press ESC to close", font=self.fonts["status"],
+            bg=self.colors["bg_main"], fg=self.colors["fg_accent"], anchor="e"
+        )
+        self.hint_label.pack(side="right")
 
         # --- 2. 圖片顯示區 ---
         self.image_frame = tk.Frame(self.main_container, bg="black", bd=2, relief="sunken")
@@ -128,6 +137,8 @@ class GameUI:
         :param self: GameUI 物件
         :param text: 狀態文字
         """
+        # 因為前面把提示文字改成 self.hint_label 了
+        # 這裡的 self.status_label 依然是指向左邊的 HP 血條，功能正常
         self.status_label.config(text=text)
 
     def update_image(self, image_path=None):
