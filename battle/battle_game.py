@@ -236,13 +236,22 @@ def final_boss_battle():
         heart.move(pygame.key.get_pressed())
 
         # ---- 生成子彈 ----
-        if frame % 20 == 0:
-            if phase == 1:
+        if phase == 1:
+            if frame % 20 == 0:
                 bullets.append(CircleBullet())
-            elif phase == 2:
+
+        elif phase == 2:
+            if frame % 20 == 0:
                 bullets.append(WaveBullet())
-            else:
+
+        else:
+            
+            if frame % 20 == 0:
                 bullets.append(HomingBullet(heart))
+
+            if frame % 40 == 0:
+                bullets.append(CircleBullet())
+
 
         # ---- 更新子彈 ----
         for b in bullets[:]:
