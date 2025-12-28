@@ -460,7 +460,7 @@ class GameManager:
                 # [修正] 只有當 restart 為 True 時，才自動跳轉回 START
                 if restart:
                     # 重新載入 START 場景來刷新按鈕 (把刪除按鈕藏起來)
-                    self.ui.master.after(1000, lambda: self.load_scene("START"))
+                    self.ui.master.after(2000, lambda: self.load_scene("START"))
             except Exception as e:
                 self.ui.type_text(f"\n【系統】刪除失敗：{e}", clear=False)
         else:
