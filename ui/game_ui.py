@@ -21,7 +21,9 @@ class GameUI:
         
         # --- 全螢幕與視窗設定 ---
         self.master.attributes("-fullscreen", True)
-        self.master.bind("<Escape>", self.exit_fullscreen)
+        
+        # 修改：將 Esc 鍵綁定到退出程式
+        self.master.bind("<Escape>", self.on_exit) 
         self.master.bind("<F11>", self.toggle_fullscreen)
         
         self.typing_job = None 
@@ -90,8 +92,8 @@ class GameUI:
         self.entry_field.pack(side="left", padx=10, ipady=8)
         
         self.confirm_btn = tk.Button(self.input_frame, text="確認送出", command=self.submit_password,
-                                    font=self.fonts["bold"], bg=self.colors["fg_accent"], fg="white",
-                                    relief="flat", cursor="hand2", padx=20, pady=5)
+                                     font=self.fonts["bold"], bg=self.colors["fg_accent"], fg="white",
+                                     relief="flat", cursor="hand2", padx=20, pady=5)
         self.confirm_btn.pack(side="left", padx=5)
 
         # --- 5. 按鈕區 ---
@@ -111,10 +113,13 @@ class GameUI:
         self.master.attributes("-fullscreen", not is_fullscreen)
         self.main_container.place(relx=0, rely=0, relwidth=1, relheight=1)
 
-    def exit_fullscreen(self, event=None):
-        self.master.attributes("-fullscreen", False)
-        self.master.geometry("1000x800")
-        self.main_container.place(relx=0, rely=0, relwidth=1, relheight=1)
+    # 新增：退出遊戲的函式
+    def on_exit(self, event=None):
+        """
+        關閉遊戲視窗
+        :param event: Tkinter 觸發事件時會自動傳入
+        """
+        self.master.destroy()
 
     def update_status(self, text):
         """
