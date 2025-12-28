@@ -4,7 +4,17 @@
 import tkinter as tk
 from story.script import SCENE_SCRIPT
 from ui.game_ui import GameUI
-from battle.battle_game import boss_battle # 沒裝 pygame 可能會直接閃退
+
+# --- 嘗試匯入戰鬥模組 (包含 Final Boss) ---
+try:
+    from battle.battle_game import boss_battle, final_boss_battle # 沒裝 pygame 可能會直接閃退
+except ImportError:
+    def boss_battle(): 
+        print("【測試模式】未找到 Pygame，預設勝利")
+        return "WIN"
+    def final_boss_battle():
+        print("【測試模式】未找到 Pygame (Final Boss)，預設勝利")
+        return "WIN"
 
 # --- 角色類別 ---
 class Character:
@@ -107,6 +117,8 @@ class GameManager:
             # 傳空陣列把按鈕清空，讓玩家不能亂按
             self.ui.set_choices([], None)
             self.ui.type_text("\n【系統】你的 HP 歸零了。冒險在此終結... (Game Over)", clear=False)
+            # 在這裡可以直接載入失敗場景，避免卡在原地
+            self.load_scene("END_LOSE") 
             return True
         return False
     
@@ -160,8 +172,8 @@ class GameManager:
         if next_action is None:
             return
 
-        # --- 1. 進入 Pygame 戰鬥 ---
-        if next_action == "BATTLE_SLIME" or next_action == "BOSS_BATTLE":
+        # --- 1. 進入 Pygame 戰鬥 (第一關史萊姆) ---
+        if next_action == "BATTLE_SLIME":
             self.ui.master.withdraw() # 先藏起來主視窗
             res = boss_battle()       # 跑 Pygame
             self.ui.master.deiconify() # 戰鬥完再顯示回來
@@ -169,12 +181,20 @@ class GameManager:
             if res == "WIN":
                 self.load_scene("WIN_SLIME") 
             elif res == "LOSE":
-                self.ui.type_text("", clear=True)
-                self.player.hp = 0
-                self.ui.update_status(f"HP: 0/100")
-                self.check_death()
+                self.load_scene("END_LOSE") # 統一導向失敗結局
 
-        # --- 2. 哥布林劇情扣血 ---
+        # --- 2. 進入 Pygame 戰鬥 (最終 Boss) ---
+        elif next_action == "BOSS_BATTLE":
+            self.ui.master.withdraw() 
+            res = final_boss_battle() # 呼叫最終 Boss 戰
+            self.ui.master.deiconify() 
+            
+            if res == "WIN":
+                self.load_scene("BOSS_WIN")
+            elif res == "LOSE":
+                self.load_scene("END_LOSE")
+
+        # --- 3. 哥布林劇情扣血 ---
         elif next_action == "LEVEL_2_GOBLIN":
             # 這裡劇情殺先扣個血
             is_dead = self.player_take_damage(10, "【系統】哥布林的冷嘲熱諷刺痛了你的心！")
@@ -190,7 +210,7 @@ class GameManager:
             self.known_password = "9527"
             self.load_scene(next_action)
             
-        # --- 3. 普通場景切換 ---
+        # --- 4. 普通場景切換 ---
         else: 
             self.load_scene(next_action)
             
