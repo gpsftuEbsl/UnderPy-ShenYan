@@ -2,8 +2,8 @@
 # 遊戲主程式與邏輯管理
 
 import tkinter as tk
-import json # <--- 新增：用於存檔
-import os   # <--- 新增：用於檢查檔案是否存在
+import json # 用於存檔
+import os   # 用於檢查檔案是否存在
 from story.script import SCENE_SCRIPT
 from ui.game_ui import GameUI
 
@@ -163,7 +163,7 @@ class GameManager:
         # 找出choice裡面的下一個場景的id
         next_action = current_scene_data["choices"].get(choice)
         
-        # === 新增：存讀檔指令判斷 ===
+        # === 存讀檔指令判斷 ===
         if next_action == "SAVE_GAME":
             self.save_game()
             return # 存完檔就停在原地，不跳轉
@@ -334,7 +334,7 @@ class GameManager:
             self.ui.type_text("\n".join(msgs), clear=False)
 
     # ==========================================
-    #  存檔與讀檔系統 (JSON) - 新增部分
+    #  存檔與讀檔系統 (JSON)
     # ==========================================
     def save_game(self):
         """ 將當前狀態寫入 savefile.json """

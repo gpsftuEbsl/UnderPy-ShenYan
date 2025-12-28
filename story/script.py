@@ -1,5 +1,5 @@
 # story/script.py
-# 這裡用來放劇本腳本    
+# 這裡用來放劇本腳本 
 
 SCENE_SCRIPT = {
     # ==========================================
@@ -10,7 +10,8 @@ SCENE_SCRIPT = {
         "choices": {
             "調查": "SLIME_INFO",
             "戰鬥 (Pygame)": "BATTLE_SLIME",
-            "逃跑": "END_RUN"
+            "逃跑": "END_RUN",
+            "讀取進度": "LOAD_GAME" # 讀取功能
         },
         "image": "assets/images/dungeon.png"
     },
@@ -25,10 +26,22 @@ SCENE_SCRIPT = {
     "WIN_SLIME": {
         "text": "你贏了！史萊姆似乎用完了所有「彈藥」。\n你在史萊姆後方發現一條向下延伸的的階梯......",
         "choices": {
-            "前往第二層": "LEVEL_2_GOBLIN"
+            "前往第二層": "LEVEL_2_GOBLIN",
+            "在樓梯口休息 (存檔)": "SAFE_ZONE_1" # 存檔分支
         },
         "image": "assets/images/stairs_down.png"
     },
+
+    # ---  存檔點 (臨時營地) ---
+    "SAFE_ZONE_1": {
+        "text": "【臨時營地】\n你坐在樓梯口的營火旁，稍微喘了一口氣。\n這裡看起來暫時是安全的。\n(你可以在這裡記錄冒險日記)",
+        "choices": {
+            "寫日記 (存檔)": "SAVE_GAME",   # <--- 觸發存檔指令
+            "繼續前進": "LEVEL_2_GOBLIN"
+        },
+        "image": "assets/images/campfire.png" 
+    },
+    # 
 
     # ==========================================
     # 第二層：哥布林與密碼門
@@ -120,9 +133,20 @@ SCENE_SCRIPT = {
     "L3_UNLOCK_SUCCESS": {
         "text": "【系統】轟隆隆隆——！\n隨著正確的順序被按下，地板開始震動。\n遠處傳來了沉重的金屬摩擦聲，那扇深黑色的大門打開了！",
         "choices": {
-            "進入黑色大門 (BOSS戰)": "BOSS_PRELUDE"
+            "前往核心區域": "SAFE_ZONE_2" # 改為前往最終存檔點
         },
         "image": "assets/images/door_open_metal.png"
+    },
+
+    # --- 最終存檔點 (系統還原點) ---
+    "SAFE_ZONE_2": {
+        "text": "【系統提示：偵測到高危險反應】\n你站在黑色大門前，門後的空氣彷彿都在震動。\n牆邊有一個發著藍光的終端機，螢幕上閃爍著「建立還原點」的字樣。\n\n(這將是你面對最終 Boss 前最後的存檔機會)",
+        "choices": {
+            "建立還原點 (存檔)": "SAVE_GAME",
+            "深呼吸，進入大門": "BOSS_PRELUDE",
+            "返回大廳": "LEVEL_3_START"
+        },
+        "image": "assets/images/save_point.png" # 記得確認圖片路徑，或是沿用 campfire
     },
 
     # --- Boss 戰前奏 ---
@@ -134,7 +158,7 @@ SCENE_SCRIPT = {
         "image": "assets/images/boss_room.png"
     },
 
-    # --- 戰勝 Boss (新增) ---
+    # --- 戰勝 Boss ---
     "BOSS_WIN": {
         "text": "【系統警告：核心程序受損...】\n虛空領主的外殼碎裂，化作無數光點消散在虛空中。\n\n隨著領主的消失，周圍的牆壁開始崩塌，一道耀眼的白光出現在前方。\n那是...出口？還是另一個輪迴的開始？",
         "choices": {
