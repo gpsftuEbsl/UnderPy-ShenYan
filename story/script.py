@@ -169,7 +169,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
 (妳記住了密碼 9527)
 妳繼續往公司深處走去，主管趁機溜走了。""",
         "choices": {
-            "前往大門": "LEVEL_2_GATE"
+             "前往大門": "LEVEL_2_GATE"
         },
         "image": "assets/images/goblin_happy.png"
     },
@@ -242,16 +242,15 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
 
 根據文檔室那三句騙人的鬼話，順序應該是？""",
         "choices": {
-            "█": "PUSH_SQUARE",
-            "◯": "PUSH_CIRCLE",
-            "△": "PUSH_TRIANGLE",
-            "放棄": "LEVEL_3_START"
+            "◯ (圓融)": "PUSH_CIRCLE",
+            "█ (正直)": "PUSH_SQUARE",
+            "△ (穩固)": "PUSH_TRIANGLE",
+            "算了，不想重置": "LEVEL_3_START"
         },
         "type": "PUZZLE",
         "image": "assets/images/dark_puzzle_room.png"
     },
 
-    # --- 解謎成功 ---
     "L3_UNLOCK_SUCCESS": {
         "text": 
 """【系統】嗶——！權限解鎖成功！
@@ -280,7 +279,9 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
         "image": "assets/images/campfire.png"
     },
 
-    # --- Boss 戰前奏 (一周目) ---
+    # ==========================================
+    # Boss 戰：體制巨獸 (The Corporate Beast)
+    # ==========================================
     "BOSS_PRELUDE": {
         "text": 
 """妳走進辦公室，一股強大的壓迫感撲面而來...
@@ -292,7 +293,8 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
         "image": "assets/images/boss_room.png"
     },
 
-    # --- Boss 戰前奏 (二周目/真相篇) ---
+    # --- 真結局分支 (二周目) ---
+    # 如果玩家已經通關過一次，沈硯會覺醒
     "BOSS_PRELUDE_LOOP": {
         "text": 
 """妳推開大門，但這次沒有壓迫感。
@@ -308,10 +310,9 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
         "choices": {
             "準備離職 (迎接終結)": "BOSS_BATTLE"
         },
-        "image": "assets/images/boss_room.png"
+        "image": "assets/images/boss_glitch.png"
     },
 
-    # --- 戰勝 Boss (一周目) ---
     "BOSS_WIN": {
         "text": 
 """老闆:『............』
@@ -324,7 +325,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
 一道耀眼的白光出現在前方。
 那是...出口？還是另一家公司的面試通知？""",
         "choices": {
-            "走向白光": "END_WIN"
+            "走出公司 (自由)": "END_WIN"
         },
         "image": "assets/images/boss_explode.png"
     },
