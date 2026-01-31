@@ -5,6 +5,7 @@ import tkinter as tk
 from functools import partial
 from PIL import Image, ImageTk
 import os
+from config import UI_COLORS, UI_FONTS, TYPEWRITER_SPEED, UI_IMAGE_WIDTH, UI_IMAGE_HEIGHT, UI_TEXT_HEIGHT, SHAKE_WINDOW_OFFSETS, SHAKE_WINDOW_INTERVAL, FLASH_RED_DURATION
 
 class GameUI:
     """
@@ -29,19 +30,9 @@ class GameUI:
         
         self.typing_job = None 
         
-        # --- 美化與字體設定 ---
-        self.colors = {
-            "bg_main": "#000000", "bg_text": "#121D25", "fg_text": "#ECF0F1",
-            "fg_accent": "#E74C3C", "btn_bg": "#121D25", "btn_fg": "#FFFFFF",
-            "btn_hover": "#434343", "input_bg": "#ECF0F1", "input_fg": "#2C3E50"
-        }
-        
-        self.fonts = {
-            "main": ("Microsoft JhengHei", 18),
-            "mono": ("Consolas", 16),
-            "bold": ("Microsoft JhengHei", 16, "bold"),
-            "status": ("Impact", 20)
-        }
+        # --- 美化與字體設定（使用 config）---
+        self.colors = UI_COLORS
+        self.fonts = UI_FONTS
 
         self.master.configure(bg=self.colors["bg_main"])
 
@@ -83,7 +74,7 @@ class GameUI:
         self.scrollbar.pack(side="right", fill="y")
 
         self.text_area = tk.Text(
-            self.text_frame, height=8, state='disabled', # 高度設為 8 行字，避免佔用過多空間
+            self.text_frame, height=UI_TEXT_HEIGHT, state='disabled', # 高度設為 8 行字，避免佔用過多空間
             bg=self.colors["bg_text"], fg=self.colors["fg_text"],
             font=self.fonts["main"], bd=0, padx=20, pady=20,
             yscrollcommand=self.scrollbar.set, relief="flat", wrap="word"
@@ -153,9 +144,9 @@ class GameUI:
             full_path = os.path.join(base_dir, image_path)
 
             img = Image.open(full_path)
-            img = img.resize((500, 350), Image.Resampling.LANCZOS)
+            img = img.resize((UI_IMAGE_WIDTH, UI_IMAGE_HEIGHT), Image.Resampling.LANCZOS)
             self.current_image = ImageTk.PhotoImage(img)
-            self.image_label.config(image=self.current_image, width=500, height=350)
+            self.image_label.config(image=self.current_image, width=UI_IMAGE_WIDTH, height=UI_IMAGE_HEIGHT)
 
         except Exception as e:
             print("圖片載入失敗：", e)
@@ -181,7 +172,7 @@ class GameUI:
                 btn.pack(side="left", padx=15)
 
     # --- 特效功能 ---
-    def type_text(self, text, speed=50, clear=True):
+    def type_text(self, text, speed=TYPEWRITER_SPEED, clear=True):
         """
         type_text 的 Docstring
 
@@ -222,9 +213,9 @@ class GameUI:
             self.typing_job = None
 
     def shake_window(self):
-        offsets = [(12, 7), (-12, -7), (10, -5), (-10, 5), (6, 3), (-6, -3), (0, 0)]
+        offsets = SHAKE_WINDOW_OFFSETS
         for i, (dx, dy) in enumerate(offsets):
-            self.master.after(i * 25, lambda x=dx, y=dy: self.main_container.place(
+            self.master.after(i * SHAKE_WINDOW_INTERVAL, lambda x=dx, y=dy: self.main_container.place(
                 x=x, y=y, relwidth=1, relheight=1
             ))
 
@@ -237,7 +228,7 @@ class GameUI:
         old = self.colors["bg_main"]
         targets = [self.master, self.main_container, self.text_frame, self.status_frame, self.button_frame]
         for f in targets: f.configure(bg="#E74C3C")
-        self.master.after(100, lambda: self._reset_color(old))
+        self.master.after(FLASH_RED_DURATION, lambda: self._reset_color(old))
 
     def _reset_color(self, bg):
         targets = [self.master, self.main_container, self.text_frame, self.status_frame, self.button_frame]

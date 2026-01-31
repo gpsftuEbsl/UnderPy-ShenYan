@@ -2,15 +2,26 @@ import pygame
 import random
 import math
 import sys
+from config import (
+    BATTLE_WINDOW_WIDTH, BATTLE_WINDOW_HEIGHT, BATTLE_FPS,
+    BATTLE_BOX_RECT, HEART_SIZE, HEART_SPEED, HEART_HP,
+    BULLET_SIZE, BULLET_SPEED, BULLET_SPAWN_INTERVAL, BULLET_DAMAGE,
+    CIRCLE_BULLET_RADIUS, CIRCLE_BULLET_SPEED, CIRCLE_BULLET_SPAWN_INTERVAL, CIRCLE_BULLET_DAMAGE,
+    WAVE_BULLET_SIZE, WAVE_BULLET_SPEED, WAVE_BULLET_SPAWN_INTERVAL, WAVE_BULLET_AMPLITUDE, WAVE_BULLET_DAMAGE,
+    HOMING_BULLET_SIZE, HOMING_BULLET_SPAWN_INTERVAL, HOMING_BULLET_LIFE, HOMING_BULLET_POWER, HOMING_BULLET_DAMAGE,
+    INTERN_BATTLE_TIME, FINAL_BOSS_BATTLE_TIME
+)
 
 # ================= 基本設定 =================
-WIDTH, HEIGHT = 480, 360
-FPS = 60
+WIDTH, HEIGHT = BATTLE_WINDOW_WIDTH, BATTLE_WINDOW_HEIGHT
+FPS = BATTLE_FPS
 
-BOX_RECT = pygame.Rect(80, 60, 320, 240)
+# 轉換 BATTLE_BOX_RECT 為 pygame.Rect
+_x, _y, _w, _h = BATTLE_BOX_RECT
+BOX_RECT = pygame.Rect(_x, _y, _w, _h)
 
-HEART_SPEED = 4
-PLAYER_HP = 100 # 100 難度較高
+HEART_SPEED = HEART_SPEED
+PLAYER_HP = HEART_HP
 
 
 # ================= 玩家（心型） =================
@@ -18,7 +29,7 @@ class Heart:
     def __init__(self):
         self.x = BOX_RECT.centerx
         self.y = BOX_RECT.centery
-        self.size = 12
+        self.size = HEART_SIZE
         self.hp = PLAYER_HP
 
     def move(self, keys):
@@ -51,10 +62,10 @@ class Heart:
 # ================= 普通 Boss 子彈 =================
 class Bullet:
     def __init__(self):
-        self.size = 30
+        self.size = BULLET_SIZE
         self.x = random.randint(BOX_RECT.left, BOX_RECT.right - self.size)
         self.y = BOX_RECT.top
-        self.speed = 4
+        self.speed = BULLET_SPEED
 
     def update(self):
         self.y += self.speed
@@ -81,7 +92,7 @@ def boss_battle():
     heart = Heart()
     bullets = []
     frame = 0
-    TOTAL_TIME = 20 # set 15-20 (正常)
+    TOTAL_TIME = INTERN_BATTLE_TIME  # set 15-20 (正常)
 
     while True:
         clock.tick(FPS)
@@ -96,7 +107,7 @@ def boss_battle():
 
         heart.move(pygame.key.get_pressed())
 
-        if frame % 25 == 0:
+        if frame % BULLET_SPAWN_INTERVAL == 0:
             bullets.append(Bullet())
 
         for b in bullets[:]:
@@ -113,7 +124,7 @@ def boss_battle():
                     heart.size * 2
                 )
             ):
-                heart.hp -= 20
+                heart.hp -= BULLET_DAMAGE
                 bullets.remove(b)
                 if heart.hp <= 0:
                     pygame.quit()
@@ -137,10 +148,10 @@ def boss_battle():
 # ================= Final Boss 子彈 =================
 class CircleBullet:
     def __init__(self):
-        self.r = 8
+        self.r = CIRCLE_BULLET_RADIUS
         self.x = random.randint(BOX_RECT.left, BOX_RECT.right)
         self.y = BOX_RECT.top
-        self.speed = 3
+        self.speed = CIRCLE_BULLET_SPEED
 
     def update(self):
         self.y += self.speed
@@ -157,12 +168,12 @@ class WaveBullet:
         self.base_x = random.randint(BOX_RECT.left, BOX_RECT.right)
         self.y = BOX_RECT.top
         self.t = random.randint(0, 360)
-        self.size = 10
+        self.size = WAVE_BULLET_SIZE
 
     def update(self):
-        self.y += 3
+        self.y += WAVE_BULLET_SPEED
         self.t += 10
-        self.x = self.base_x + math.sin(math.radians(self.t)) * 40
+        self.x = self.base_x + math.sin(math.radians(self.t)) * WAVE_BULLET_AMPLITUDE
 
     def draw(self, screen):
         pygame.draw.rect(screen, (0, 200, 255),
@@ -178,10 +189,10 @@ class HomingBullet:
         self.target = target
         self.x = random.choice([BOX_RECT.left, BOX_RECT.right])
         self.y = random.randint(BOX_RECT.top, BOX_RECT.bottom)
-        self.size = 10
+        self.size = HOMING_BULLET_SIZE
 
-        self.life = 90        # ★ 追蹤 3 秒後自爆
-        self.homing_power = 0.015
+        self.life = HOMING_BULLET_LIFE        # ★ 追蹤 3 秒後自爆
+        self.homing_power = HOMING_BULLET_POWER
 
     def update(self):
         self.x += (self.target.x - self.x) * self.homing_power
@@ -212,7 +223,7 @@ def final_boss_battle():
     heart = Heart()
     bullets = []
     frame = 0
-    TOTAL_TIME = 50 # set 50 (>50 我覺得太難了)
+    TOTAL_TIME = FINAL_BOSS_BATTLE_TIME # set 50 (>50 我覺得太難了)
 
     while True:
         clock.tick(FPS)
@@ -237,19 +248,19 @@ def final_boss_battle():
 
         # ---- 生成子彈 ----
         if phase == 1:
-            if frame % 20 == 0:
+            if frame % CIRCLE_BULLET_SPAWN_INTERVAL == 0:
                 bullets.append(CircleBullet())
 
         elif phase == 2:
-            if frame % 20 == 0:
+            if frame % WAVE_BULLET_SPAWN_INTERVAL == 0:
                 bullets.append(WaveBullet())
 
         else:
             
-            if frame % 20 == 0:
+            if frame % HOMING_BULLET_SPAWN_INTERVAL == 0:
                 bullets.append(HomingBullet(heart))
 
-            if frame % 40 == 0:
+            if frame % (CIRCLE_BULLET_SPAWN_INTERVAL * 2) == 0:
                 bullets.append(CircleBullet())
 
 
@@ -274,7 +285,7 @@ def final_boss_battle():
                     heart.size * 2
                 )
             ):
-                heart.hp -= 10 if phase < 3 else 20
+                heart.hp -= CIRCLE_BULLET_DAMAGE if phase < 3 else HOMING_BULLET_DAMAGE
                 bullets.remove(b)
                 if heart.hp <= 0:
                     pygame.quit()

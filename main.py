@@ -7,6 +7,13 @@ import os   # 用於檢查檔案是否存在
 from story.script import SCENE_SCRIPT
 from ui.game_ui import GameUI
 from battle.battle_game import boss_battle, final_boss_battle # 沒裝 pygame 可能會直接閃退
+from config import (
+    PLAYER_NAME, PLAYER_MAX_HP, PLAYER_ATK,
+    MANAGER_NAME, MANAGER_HP, MANAGER_ATK,
+    PUZZLE_ANSWER, CORRECT_PASSWORD, SCENE_OVERRIDES,
+    SCENARIO_DAMAGE_MANAGER, PASSWORD_ERROR_DAMAGE, PUZZLE_FAILURE_DAMAGE,
+    SAVE_FILE, SCENE_TRANSITION_DELAY
+)
 
 # --- 角色類別 ---
 class Character:
@@ -54,7 +61,7 @@ class GameManager:
     """
     def __init__(self, ui):
         self.ui = ui
-        self.player = Character("勇者", 100, 15)
+        self.player = Character(PLAYER_NAME, PLAYER_MAX_HP, PLAYER_ATK)
         self.current_enemy = None # Character 物件
         self.script_data = SCENE_SCRIPT
         self.current_scene_id = "START"
@@ -64,7 +71,7 @@ class GameManager:
         self.has_beaten_boss = False 
 
         # --- Level 3 解謎設定 ---
-        self.puzzle_answer = ["◯", "△", "█"]
+        self.puzzle_answer = PUZZLE_ANSWER
         self.puzzle_current = []
 
     def start_game(self):
@@ -146,12 +153,11 @@ class GameManager:
         # 如果要載入的是 START，且玩家已經打贏過 Boss
         target_scene_id = scene_id
         
+        # 使用場景映射表簡化邏輯
         if self.has_beaten_boss:
-            if scene_id == "START" and "START_LOOP" in self.script_data:
-                target_scene_id = "START_LOOP"
-            # 如果進入 Boss 前奏，且已通關過，切換到真相篇
-            elif scene_id == "BOSS_PRELUDE" and "BOSS_PRELUDE_LOOP" in self.script_data:
-                target_scene_id = "BOSS_PRELUDE_LOOP"
+            override_scene_id = SCENE_OVERRIDES.get(scene_id)
+            if override_scene_id and override_scene_id in self.script_data:
+                target_scene_id = override_scene_id
 
         self.current_scene_id = target_scene_id # 將實體變數設定為確認後的 ID
         
@@ -254,14 +260,14 @@ class GameManager:
         if next_action is None:
             return
 
-        # --- 1. 進入 Pygame 戰鬥 (第一關史萊姆) ---
-        if next_action == "BATTLE_SLIME":
+        # --- 1. 進入 Pygame 戰鬥 (第一關實習生) ---
+        if next_action == "BATTLE_INTERN":
             self.ui.master.withdraw() # 先藏起來主視窗
             res = boss_battle()       # 跑 Pygame
             self.ui.master.deiconify() # 戰鬥完再顯示回來
             
             if res == "WIN":
-                self.load_scene("WIN_SLIME") 
+                self.load_scene("INTERN_DEFEATED") 
             elif res == "LOSE":
                 self.load_scene("END_LOSE") # 統一導向失敗結局
 
@@ -280,19 +286,19 @@ class GameManager:
             elif res == "LOSE":
                 self.load_scene("END_LOSE")
 
-        # --- 3. 哥布林劇情扣血 ---
-        elif next_action == "LEVEL_2_GOBLIN":
+        # --- 3. 主管劇情扣血 ---
+        elif next_action == "MANAGER_ENCOUNTER":
             # 這裡劇情殺先扣個血
-            is_dead = self.player_take_damage(10, "【系統】哥布林的冷嘲熱諷刺痛了你的心！")
+            is_dead = self.player_take_damage(SCENARIO_DAMAGE_MANAGER, "【系統】主管的冷嘲熱諷刺痛了你的心！")
             if is_dead == False:
                 self.load_scene(next_action)
             
-        elif next_action == "START_GOBLIN_BATTLE":
-            self.current_enemy = Character("吊嘎哥布林", 45, 8)
-            self.ui.type_text("【系統】你忍無可忍，拔劍衝向哥布林！", clear=False)
-            self.enter_goblin_combat_loop()
+        elif next_action == "START_MANAGER_BATTLE":
+            self.current_enemy = Character(MANAGER_NAME, MANAGER_HP, MANAGER_ATK)
+            self.ui.type_text("【系統】你忍無可忍，拔劍衝向主管！", clear=False)
+            self.enter_manager_combat_loop()
             
-        elif next_action == "GOBLIN_SPARED":
+        elif next_action == "MANAGER_SPARED":
             self.known_password = "9527"
             self.load_scene(next_action)
             
@@ -321,22 +327,22 @@ class GameManager:
                 
                 # 延遲一下再切換場景
                 # 因為 after 不能直接塞有參數的函式，所以這裡改用 lambda
-                self.ui.master.after(2000, lambda: self.load_scene("L3_UNLOCK_SUCCESS"))
+                self.ui.master.after(SCENE_TRANSITION_DELAY, lambda: self.load_scene("PUZZLE_SUCCESS"))
             else:
                 self.puzzle_current = []
                 msg = "【系統】嗶嗶！順序錯誤！機關發出了強烈的電擊！"
                 # 懲罰扣血
-                is_dead = self.player_take_damage(45, msg)
+                is_dead = self.player_take_damage(PUZZLE_FAILURE_DAMAGE, msg)
                 if is_dead == False:
                     self.ui.type_text("\n可惡失敗了...\n失敗為成功之母，再逝逝好了", clear=False)
 
     # ==========================================
-    #  Level 2: 哥布林戰鬥迴圈 TODO: 之後可以重新命名同level的函式 或做成類別
+    #  Level 2: 主管戰鬥迴圈 TODO: 之後可以重新命名同level的函式 或做成類別
     # ==========================================
-    def enter_goblin_combat_loop(self):
-        self.ui.set_choices(["攻擊", "防禦"], self.handle_goblin_combat)
+    def enter_manager_combat_loop(self):
+        self.ui.set_choices(["攻擊", "防禦"], self.handle_manager_combat)
 
-    def handle_goblin_combat(self, action):
+    def handle_manager_combat(self, action):
         logs = []
         if action == "攻擊":
             msg = self.player.attack(self.current_enemy)
@@ -344,7 +350,7 @@ class GameManager:
             
             if self.current_enemy.is_alive() == False:
                 self.ui.type_text("\n".join(logs), clear=False)
-                self.load_scene("GOBLIN_DEFEATED")
+                self.load_scene("MANAGER_DEFEATED")
                 return
             
             # 敵人反擊
@@ -370,7 +376,7 @@ class GameManager:
             self.ui.shake_window()
 
         if self.check_death(): return
-        self.enter_goblin_combat_loop()
+        self.enter_manager_combat_loop()
 
     # ==========================================
     #  Level 2: 密碼輸入 TODO: 之後可以重新命名同level的函式 或做成類別
@@ -385,16 +391,16 @@ class GameManager:
         else:
             msgs.append("你輸入了：啥都沒有")
         
-        if val == "9527":
+        if val == CORRECT_PASSWORD:
             msgs.append("【系統】密碼正確！大門緩緩打開...")
             self.ui.type_text("\n".join(msgs), clear=False)
             self.ui.hide_input_field()
             
             # 用after方法延遲跳轉
             # 這個也是為了 after 寫的延遲，改用 lambda
-            self.ui.master.after(2000, lambda: self.load_scene("LEVEL_3_START"))
+            self.ui.master.after(SCENE_TRANSITION_DELAY, lambda: self.load_scene("SERVER_ROOM_START"))
         else:
-            if self.player_take_damage(5): return
+            if self.player_take_damage(PASSWORD_ERROR_DAMAGE): return
             msgs.append("【系統】密碼錯誤！大門發出尖銳嘲笑聲。")
 
             if self.known_password:
@@ -417,7 +423,7 @@ class GameManager:
         }
         
         try:
-            with open("savefile.json", "w", encoding="utf-8") as f:
+            with open(SAVE_FILE, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
             
             self.ui.type_text("\n【系統】進度已儲存！", clear=False)
@@ -426,16 +432,16 @@ class GameManager:
 
     def load_game(self):
         """ 讀取 savefile.json 並恢復狀態 """
-        if not os.path.exists("savefile.json"):
+        if not os.path.exists(SAVE_FILE):
             self.ui.type_text("\n【系統】找不到存檔紀錄！請先進行遊戲並存檔。", clear=False)
             return
 
         try:
-            with open("savefile.json", "r", encoding="utf-8") as f:
+            with open(SAVE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
             
             # 恢復數值
-            self.player.hp = data.get("hp", 100)
+            self.player.hp = data.get("hp", PLAYER_MAX_HP)
             self.current_scene_id = data.get("scene", "START")
             self.known_password = data.get("known_password")
             self.has_beaten_boss = data.get("has_beaten_boss", False) # 恢復通關狀態
@@ -444,23 +450,23 @@ class GameManager:
             self.ui.type_text("\n【系統】讀檔成功 跳轉中.", clear=False) # 避免覆蓋文字
             
             self.ui.update_status(f"HP: {self.player.hp}/{self.player.max_hp}") # 避免覆蓋文字
-            self.ui.master.after(2000, lambda: self.load_scene(self.current_scene_id)) # 避免覆蓋文字
+            self.ui.master.after(LOAD_GAME_DELAY, lambda: self.load_scene(self.current_scene_id)) # 避免覆蓋文字
             
         except Exception as e:
             self.ui.type_text(f"\n【系統】讀檔檔案損毀或格式錯誤：{e}", clear=False)
 
     def delete_all_save(self, restart=True):
         """ 刪除存檔並重置。restart=True 代表刪完要跳回開頭，False 代表停在原地 """
-        if os.path.exists("savefile.json"):
+        if os.path.exists(SAVE_FILE):
             try:
-                os.remove("savefile.json")
+                os.remove(SAVE_FILE)
                 self.has_beaten_boss = False # 重置記憶
                 self.ui.type_text("\n【系統】存檔已刪除！世界線已重置。", clear=False)
                 
                 # [修正] 只有當 restart 為 True 時，才自動跳轉回 START
                 if restart:
                     # 重新載入 START 場景來刷新按鈕 (把刪除按鈕藏起來)
-                    self.ui.master.after(2000, lambda: self.load_scene("START"))
+                    self.ui.master.after(SCENE_TRANSITION_DELAY, lambda: self.load_scene("START"))
             except Exception as e:
                 self.ui.type_text(f"\n【系統】刪除失敗：{e}", clear=False)
         else:

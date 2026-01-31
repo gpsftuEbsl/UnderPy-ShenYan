@@ -22,8 +22,8 @@ SCENE_SCRIPT = {
 那是... 新來的實習生 Kevin！""",
         
         "choices": {
-            "查看他的問題 (調查)": "SLIME_INFO",
-            "叫他讓開 (戰鬥)": "BATTLE_SLIME",
+            "查看他的問題 (調查)": "INTERN_CRISIS",
+            "叫他讓開 (戰鬥)": "BATTLE_INTERN",
             "裝作沒看到 (逃跑)": "END_RUN",
             "檢查備份 (讀取)": "LOAD_GAME"
             # [DEBUG] 按鈕已移除
@@ -51,8 +51,8 @@ SCENE_SCRIPT = {
 這次，也許能徹底打破這個加班輪迴？""",
         
         "choices": {
-            "查看他的問題 (調查)": "SLIME_INFO",
-            "叫他讓開 (戰鬥)": "BATTLE_SLIME",
+            "查看他的問題 (調查)": "INTERN_CRISIS",
+            "叫他讓開 (戰鬥)": "BATTLE_INTERN",
             "裝作沒看到 (逃跑)": "END_RUN",
             "檢查備份 (讀取)": "LOAD_GAME"
             # [DEBUG] 按鈕已移除
@@ -63,7 +63,7 @@ SCENE_SCRIPT = {
 
     # ---------------------------
 
-    "SLIME_INFO": {
+    "INTERN_CRISIS": {
         "text": """實習生 Kevin 一臉無辜地看著妳...
 (一股想吐的胃酸味襲來)
 
@@ -73,13 +73,13 @@ Kevin：「硯姊... 那個...
 妳看著他天真無邪的眼神，手裡的咖啡杯差點捏碎。
 他正源源不絕地製造 Bug 子彈。""",
         "choices": {
-            "幫他修 Code (戰鬥)": "BATTLE_SLIME",
+            "幫他修 Code (戰鬥)": "BATTLE_INTERN",
             "請假回家 (逃跑)": "END_RUN"
         },
         "image": "assets/images/slime_intern.png"
     },
 
-    "WIN_SLIME": {
+    "INTERN_DEFEATED": {
         "text": """妳花了三小時把實習生搞砸的 Code 修好了。
 
 Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
@@ -87,7 +87,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
 
 妳看著空蕩蕩的辦公室，發現通往二樓會議室的樓梯...""",
         "choices": {
-            "前往二樓會議室": "LEVEL_2_GOBLIN",
+            "前往二樓會議室": "MANAGER_ENCOUNTER",
             "在茶水間休息 (存檔)": "SAFE_ZONE_1"
         },
         "image": "assets/images/office_hallway.png"
@@ -108,24 +108,24 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
     },
 
     # ==========================================
-    # 第二層：主管哥布林
+    # 第二層：主管
     # ==========================================
-    "LEVEL_2_GOBLIN": {
+    "MANAGER_ENCOUNTER": {
         "text": """【第二層：地獄會議室】
 【主管嘲諷：理智下降】【主管HP：45】
 
 主管：「沈硯啊，客戶說那個功能明天就要，
 妳今晚通個宵沒問題吧？」
 
-前方出現一隻穿著不合身西裝的哥布林主管！
+前方出現一隻穿著不合身西裝的主管！
 (他攔住了妳，看來不講道理是不行了！)""",
         "choices": {
-            "拒絕加班 (戰鬥)": "START_GOBLIN_BATTLE"
+            "拒絕加班 (戰鬥)": "START_MANAGER_BATTLE"
         },
         "image": "assets/images/goblin_manager.png"
     },
 
-    "GOBLIN_DEFEATED": {
+    "MANAGER_DEFEATED": {
         "text": """主管被妳的邏輯連擊駁倒了！
 
 主管：「好啦好啦... 那時程延後兩天... 
@@ -133,13 +133,13 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
 
 (主管甩鍋後逃跑了，徹底失去了戰意)""",
         "choices": {
-            "逼他簽字": "GOBLIN_KILLED",
-            "放過他": "GOBLIN_SPARED"
+            "逼他簽字": "MANAGER_ELIMINATED",
+            "放過他": "MANAGER_SPARED"
         },
         "image": "assets/images/manager_cry.png"
     },
 
-    "GOBLIN_KILLED": {
+    "MANAGER_ELIMINATED": {
         "text": """妳擔心放走主管會有隱患，
 心想:「此人只會畫大餅，留著也是禍害!」
 於是妳逼他簽下了「不加班保證書」。
@@ -148,12 +148,12 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
 但是... 他身上什麼都沒有。
 妳總覺得好像錯過了什麼重要資訊......""",
         "choices": {
-            "前往大門": "LEVEL_2_GATE"
+            "前往大門": "SECURITY_GATE"
         },
         "image": "assets/images/empty_meeting_room.png"
     },
 
-    "GOBLIN_SPARED": {
+    "MANAGER_SPARED": {
         "text": """主管感動涕零：
 「沈硯妳人真好！
 ...我想...這個加班代碼妳應該會需要--9527--」
@@ -161,12 +161,12 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
 (妳記住了密碼 9527)
 妳繼續往公司深處走去，主管趁機溜走了。""",
         "choices": {
-            "前往大門": "LEVEL_2_GATE"
+            "前往大門": "SECURITY_GATE"
         },
         "image": "assets/images/manager_happy.png"
     },
 
-    "LEVEL_2_GATE": {
+    "SECURITY_GATE": {
         "text": """妳來到公司核心區域的大門前。
 門禁系統顯示：『請輸入加班通行密碼』""",
         "choices": {}, 
@@ -177,7 +177,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
     # ==========================================
     # 第三層：核心機房
     # ==========================================
-    "LEVEL_3_START": {
+    "SERVER_ROOM_START": {
         "text": """【第三層：核心機房】
 大門開啟後，妳被冷氣凍得發抖。
 這裡不再是會議室，而是充滿嗡嗡聲的伺服器機房！
@@ -185,30 +185,30 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
 
 機房連接著三個區域：""",
         "choices": {
-            "Legacy Code 區 (左)": "L3_DOOR_ROOM",
-            "歷史文檔室 (右)": "L3_ART_ROOM",
-            "系統終端機 (前)": "L3_PUZZLE_ROOM"
+            "Legacy Code 區 (左)": "LEGACY_CODE_AREA",
+            "哲學牆 (右)": "PHILOSOPHY_WALL",
+            "系統終端機 (前)": "TERMINAL_PUZZLE"
         },
         "image": "assets/images/server_room.png",
         "type": "NORMAL"
     },
 
     # --- 房間 1：Legacy Code ---
-    "L3_DOOR_ROOM": {
+    "LEGACY_CODE_AREA": {
         "text": """妳走進左側區域，盡頭是一扇貼著「勿動」封條的黑色機櫃。
 那是傳說中的 Legacy Code (遺留代碼)。
 妳試著打開它，但權限不足。
 
 看來不解開終端機的鎖是過不去的。""",
         "choices": {
-            "返回機房": "LEVEL_3_START"
+            "返回機房": "SERVER_ROOM_START"
         },
         "image": "assets/images/legacy_server.png",
         "type": "NORMAL"
     },
 
-    # --- 房間 2：文檔室 ---
-    "L3_ART_ROOM": {
+    # --- 房間 2：哲學牆 ---
+    "PHILOSOPHY_WALL": {
         "text": """這是一個堆滿紙箱的文檔室。
 妳注意到牆上掛著公司創辦人的三句名言 (雖然都沒做到)：
 
@@ -216,30 +216,30 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
 2.『誠信』：要像正方形一樣正直，方方正正。
 3.『穩定』：要像三角形一樣穩固，支撐一切。""",
         "choices": {
-            "返回機房": "LEVEL_3_START"
+            "返回機房": "SERVER_ROOM_START"
         },
         "image": "assets/images/history_wall.png",
         "type": "NORMAL"
     },
 
     # --- 房間 3：終端機謎題 (PUZZLE 模式) ---
-    "L3_PUZZLE_ROOM": {
+    "TERMINAL_PUZZLE": {
         "text": """這個終端機螢幕發出微弱的光。
 螢幕上顯示著「系統重置程序」。
 
 根據文檔室那三句騙人的鬼話，順序應該是？""",
         "choices": {
-            "█ (正直)": "PUSH_SQUARE",
-            "◯ (圓融)": "PUSH_CIRCLE",
-            "△ (穩固)": "PUSH_TRIANGLE",
-            "放棄": "LEVEL_3_START"
+            "█ (正直)": "PUZZLE_SELECT_SQUARE",
+            "◯ (圓融)": "PUZZLE_SELECT_CIRCLE",
+            "△ (穩固)": "PUZZLE_SELECT_TRIANGLE",
+            "放棄": "SERVER_ROOM_START"
         },
         "type": "PUZZLE",
         "image": "assets/images/terminal_screen.png"
     },
 
     # --- 解謎成功 ---
-    "L3_UNLOCK_SUCCESS": {
+    "PUZZLE_SUCCESS": {
         "text": """【系統】嗶——！權限解鎖成功！
 隨著正確的順序被按下，機房地板開始震動。
 遠處傳來了電梯運作的聲音，那扇黑色的總裁電梯門打開了！""",
@@ -352,8 +352,8 @@ Please select a chapter to jump to...
 (Warning: Jumping may break story consistency)""",
         "choices": {
             "1. Intern (Level 1)": "START",
-            "2. Manager (Level 2)": "LEVEL_2_GOBLIN",
-            "3. Server Room (Level 3)": "LEVEL_3_START",
+            "2. Manager (Level 2)": "MANAGER_ENCOUNTER",
+            "3. Server Room (Level 3)": "SERVER_ROOM_START",
             "4. Boss (Normal)": "BOSS_PRELUDE",
             "5. Boss (True Loop)": "BOSS_PRELUDE_LOOP",
             "6. Back to Start": "START"
