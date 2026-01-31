@@ -93,14 +93,15 @@ class GameManager:
 
     def check_global_status(self):
         """ 只檢查是否有通關紀錄，不載入其他存檔 """
-        if os.path.exists("savefile.json"):
+        if os.path.exists(SAVE_FILE):
             try:
-                with open("savefile.json", "r", encoding="utf-8") as f:
+                with open(SAVE_FILE, "r", encoding="utf-8") as f:
                     data = json.load(f)
                     # 讀取是否通關過，預設是 False
                     self.has_beaten_boss = data.get("has_beaten_boss", False)
-            except:
-                pass
+            except (json.JSONDecodeError, IOError) as e:
+                # 存檔被損毀時，重置通關狀態
+                self.has_beaten_boss = False
 
     def player_take_damage(self, amount, message=None):
         """
@@ -425,10 +426,11 @@ class GameManager:
         try:
             with open(SAVE_FILE, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
-            
             self.ui.type_text("\n【系統】進度已儲存！", clear=False)
+        except IOError as e:
+            self.ui.type_text("\n【系統】存檔失敗：無法寫入檔案。請檢查磁碟空間。", clear=False)
         except Exception as e:
-            self.ui.type_text(f"\n【系統】存檔失敗：{e}", clear=False)
+            self.ui.type_text("\n【系統】存檔失敗：發生未知錯誤。", clear=False)
 
     def load_game(self):
         """ 讀取 savefile.json 並恢復狀態 """
@@ -440,6 +442,10 @@ class GameManager:
             with open(SAVE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
             
+            # 驗證存檔資料的完整性
+            if not isinstance(data, dict) or "hp" not in data or "scene" not in data:
+                raise ValueError("存檔資料不完整")
+            
             # 恢復數值
             self.player.hp = data.get("hp", PLAYER_MAX_HP)
             self.current_scene_id = data.get("scene", "START")
@@ -447,13 +453,16 @@ class GameManager:
             self.has_beaten_boss = data.get("has_beaten_boss", False) # 恢復通關狀態
             
             # 更新畫面
-            self.ui.type_text("\n【系統】讀檔成功 跳轉中.", clear=False) # 避免覆蓋文字
+            self.ui.type_text("\n【系統】讀檔成功 跳轉中.", clear=False)
+            self.ui.update_status(f"HP: {self.player.hp}/{self.player.max_hp}")
+            self.ui.master.after(LOAD_GAME_DELAY, lambda: self.load_scene(self.current_scene_id))
             
-            self.ui.update_status(f"HP: {self.player.hp}/{self.player.max_hp}") # 避免覆蓋文字
-            self.ui.master.after(LOAD_GAME_DELAY, lambda: self.load_scene(self.current_scene_id)) # 避免覆蓋文字
-            
+        except FileNotFoundError:
+            self.ui.type_text("\n【系統】找不到存檔紀錄！", clear=False)
+        except (json.JSONDecodeError, ValueError) as e:
+            self.ui.type_text("\n【系統】存檔已損毀或格式錯誤，無法讀取。", clear=False)
         except Exception as e:
-            self.ui.type_text(f"\n【系統】讀檔檔案損毀或格式錯誤：{e}", clear=False)
+            self.ui.type_text("\n【系統】讀檔失敗：發生未知錯誤。", clear=False)
 
     def delete_all_save(self, restart=True):
         """ 刪除存檔並重置。restart=True 代表刪完要跳回開頭，False 代表停在原地 """
@@ -463,12 +472,13 @@ class GameManager:
                 self.has_beaten_boss = False # 重置記憶
                 self.ui.type_text("\n【系統】存檔已刪除！世界線已重置。", clear=False)
                 
-                # [修正] 只有當 restart 為 True 時，才自動跳轉回 START
+                # 只有當 restart 為 True 時，才自動跳轉回 START
                 if restart:
-                    # 重新載入 START 場景來刷新按鈕 (把刪除按鈕藏起來)
                     self.ui.master.after(SCENE_TRANSITION_DELAY, lambda: self.load_scene("START"))
+            except OSError as e:
+                self.ui.type_text("\n【系統】刪除失敗：無法刪除檔案。請檢查檔案權限。", clear=False)
             except Exception as e:
-                self.ui.type_text(f"\n【系統】刪除失敗：{e}", clear=False)
+                self.ui.type_text("\n【系統】刪除失敗：發生未知錯誤。", clear=False)
         else:
             self.ui.type_text("\n【系統】沒有存檔。", clear=False)
 

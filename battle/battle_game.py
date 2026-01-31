@@ -12,7 +12,8 @@ from config import (
     INTERN_BATTLE_TIME, FINAL_BOSS_BATTLE_TIME
 )
 
-# ================= 基本設定 =================
+
+# ================= 基本設定與初始化 =================
 WIDTH, HEIGHT = BATTLE_WINDOW_WIDTH, BATTLE_WINDOW_HEIGHT
 FPS = BATTLE_FPS
 
@@ -22,6 +23,19 @@ BOX_RECT = pygame.Rect(_x, _y, _w, _h)
 
 HEART_SPEED = HEART_SPEED
 PLAYER_HP = HEART_HP
+
+
+def init_pygame():
+    """初始化 Pygame，返回 (screen, clock, font) 或 None 以表示失敗"""
+    try:
+        pygame.init()
+        screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        clock = pygame.time.Clock()
+        font = pygame.font.SysFont("arial", 24)
+        return screen, clock, font
+    except Exception as e:
+        print(f"Pygame 初始化失敗：{e}")
+        return None
 
 
 # ================= 玩家（心型） =================
@@ -83,66 +97,73 @@ class Bullet:
 
 # ================= 普通 Boss（原本保留） =================
 def boss_battle():
-    pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    """第一關實習生戰鬥"""
+    init_result = init_pygame()
+    if init_result is None:
+        return "ERROR"
+    
+    screen, clock, font = init_result
     pygame.display.set_caption("Boss Battle")
-    clock = pygame.time.Clock()
-    font = pygame.font.SysFont("arial", 24)
+    
+    try:
+        heart = Heart()
+        bullets = []
+        frame = 0
+        TOTAL_TIME = INTERN_BATTLE_TIME  # set 15-20 (正常)
 
-    heart = Heart()
-    bullets = []
-    frame = 0
-    TOTAL_TIME = INTERN_BATTLE_TIME  # set 15-20 (正常)
+        while True:
+            clock.tick(FPS)
+            screen.fill((0, 0, 0))
+            frame += 1
+            remaining_time = max(0, TOTAL_TIME - frame // FPS)
 
-    while True:
-        clock.tick(FPS)
-        screen.fill((0, 0, 0))
-        frame += 1
-        remaining_time = max(0, TOTAL_TIME - frame // FPS)
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                return "QUIT"
-
-        heart.move(pygame.key.get_pressed())
-
-        if frame % BULLET_SPAWN_INTERVAL == 0:
-            bullets.append(Bullet())
-
-        for b in bullets[:]:
-            b.update()
-            if b.is_off():
-                bullets.remove(b)
-                continue
-
-            if b.rect().colliderect(
-                pygame.Rect(
-                    heart.x - heart.size,
-                    heart.y - heart.size,
-                    heart.size * 2,
-                    heart.size * 2
-                )
-            ):
-                heart.hp -= BULLET_DAMAGE
-                bullets.remove(b)
-                if heart.hp <= 0:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
                     pygame.quit()
-                    return "LOSE"
+                    return "QUIT"
 
-        pygame.draw.rect(screen, (255, 255, 255), BOX_RECT, 2)
-        heart.draw(screen)
-        for b in bullets:
-            b.draw(screen)
+            heart.move(pygame.key.get_pressed())
 
-        screen.blit(font.render(f"HP: {heart.hp}", True, (255, 255, 255)), (20, 20))
-        screen.blit(font.render(f"Time: {remaining_time}", True, (255, 255, 255)), (350, 20))
+            if frame % BULLET_SPAWN_INTERVAL == 0:
+                bullets.append(Bullet())
 
-        pygame.display.update()
+            for b in bullets[:]:
+                b.update()
+                if b.is_off():
+                    bullets.remove(b)
+                    continue
 
-        if remaining_time <= 0:
-            pygame.quit()
-            return "WIN"
+                if b.rect().colliderect(
+                    pygame.Rect(
+                        heart.x - heart.size,
+                        heart.y - heart.size,
+                        heart.size * 2,
+                        heart.size * 2
+                    )
+                ):
+                    heart.hp -= BULLET_DAMAGE
+                    bullets.remove(b)
+                    if heart.hp <= 0:
+                        pygame.quit()
+                        return "LOSE"
+
+            pygame.draw.rect(screen, (255, 255, 255), BOX_RECT, 2)
+            heart.draw(screen)
+            for b in bullets:
+                b.draw(screen)
+
+            screen.blit(font.render(f"HP: {heart.hp}", True, (255, 255, 255)), (20, 20))
+            screen.blit(font.render(f"Time: {remaining_time}", True, (255, 255, 255)), (350, 20))
+
+            pygame.display.update()
+
+            if remaining_time <= 0:
+                pygame.quit()
+                return "WIN"
+    except Exception as e:
+        print(f"戰鬥過程出錯：{e}")
+        pygame.quit()
+        return "ERROR"
 
 
 # ================= Final Boss 子彈 =================
@@ -214,98 +235,104 @@ class HomingBullet:
 
 # ================= Final Boss（三階段） =================
 def final_boss_battle():
-    pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    """最終 Boss 三階段戰鬥"""
+    init_result = init_pygame()
+    if init_result is None:
+        return "ERROR"
+    
+    screen, clock, font = init_result
     pygame.display.set_caption("FINAL BOSS")
-    clock = pygame.time.Clock()
-    font = pygame.font.SysFont("arial", 24)
+    
+    try:
+        heart = Heart()
+        bullets = []
+        frame = 0
+        TOTAL_TIME = FINAL_BOSS_BATTLE_TIME # set 50 (>50 我覺得太難了)
 
-    heart = Heart()
-    bullets = []
-    frame = 0
-    TOTAL_TIME = FINAL_BOSS_BATTLE_TIME # set 50 (>50 我覺得太難了)
+        while True:
+            clock.tick(FPS)
+            screen.fill((0, 0, 0))
+            frame += 1
+            remaining_time = max(0, TOTAL_TIME - frame // FPS)
 
-    while True:
-        clock.tick(FPS)
-        screen.fill((0, 0, 0))
-        frame += 1
-        remaining_time = max(0, TOTAL_TIME - frame // FPS)
+            # ---- Phase 判定 ----
+            if remaining_time > 40:
+                phase = 1
+            elif remaining_time > 20:
+                phase = 2
+            else:
+                phase = 3
 
-        # ---- Phase 判定 ----
-        if remaining_time > 40:
-            phase = 1
-        elif remaining_time > 20:
-            phase = 2
-        else:
-            phase = 3
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                return "QUIT"
-
-        heart.move(pygame.key.get_pressed())
-
-        # ---- 生成子彈 ----
-        if phase == 1:
-            if frame % CIRCLE_BULLET_SPAWN_INTERVAL == 0:
-                bullets.append(CircleBullet())
-
-        elif phase == 2:
-            if frame % WAVE_BULLET_SPAWN_INTERVAL == 0:
-                bullets.append(WaveBullet())
-
-        else:
-            
-            if frame % HOMING_BULLET_SPAWN_INTERVAL == 0:
-                bullets.append(HomingBullet(heart))
-
-            if frame % (CIRCLE_BULLET_SPAWN_INTERVAL * 2) == 0:
-                bullets.append(CircleBullet())
-
-
-        # ---- 更新子彈 ----
-        for b in bullets[:]:
-            b.update()
-
-            # ★ 追蹤子彈自爆（時間到）
-            if isinstance(b, HomingBullet) and b.life <= 0:
-                bullets.remove(b)
-                continue
-
-            if not BOX_RECT.colliderect(b.rect()):
-                bullets.remove(b)
-                continue
-
-            if b.rect().colliderect(
-                pygame.Rect(
-                    heart.x - heart.size,
-                    heart.y - heart.size,
-                    heart.size * 2,
-                    heart.size * 2
-                )
-            ):
-                heart.hp -= CIRCLE_BULLET_DAMAGE if phase < 3 else HOMING_BULLET_DAMAGE
-                bullets.remove(b)
-                if heart.hp <= 0:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
                     pygame.quit()
-                    return "LOSE"
+                    return "QUIT"
 
-        # ---- 繪圖 ----
-        pygame.draw.rect(screen, (255, 0, 0), BOX_RECT, 2)
-        heart.draw(screen)
-        for b in bullets:
-            b.draw(screen)
+            heart.move(pygame.key.get_pressed())
 
-        screen.blit(font.render(f"FINAL BOSS PHASE {phase}", True, (255, 100, 100)), (120, 10))
-        screen.blit(font.render(f"HP: {heart.hp}", True, (255, 255, 255)), (20, 330))
-        screen.blit(font.render(f"Time: {remaining_time}", True, (255, 255, 255)), (350, 330))
+            # ---- 生成子彈 ----
+            if phase == 1:
+                if frame % CIRCLE_BULLET_SPAWN_INTERVAL == 0:
+                    bullets.append(CircleBullet())
 
-        pygame.display.update()
+            elif phase == 2:
+                if frame % WAVE_BULLET_SPAWN_INTERVAL == 0:
+                    bullets.append(WaveBullet())
 
-        if remaining_time <= 0:
-            pygame.quit()
-            return "WIN"
+            else:
+                if frame % HOMING_BULLET_SPAWN_INTERVAL == 0:
+                    bullets.append(HomingBullet(heart))
+
+                if frame % (CIRCLE_BULLET_SPAWN_INTERVAL * 2) == 0:
+                    bullets.append(CircleBullet())
+
+
+            # ---- 更新子彈 ----
+            for b in bullets[:]:
+                b.update()
+
+                # ★ 追蹤子彈自爆（時間到）
+                if isinstance(b, HomingBullet) and b.life <= 0:
+                    bullets.remove(b)
+                    continue
+
+                if not BOX_RECT.colliderect(b.rect()):
+                    bullets.remove(b)
+                    continue
+
+                if b.rect().colliderect(
+                    pygame.Rect(
+                        heart.x - heart.size,
+                        heart.y - heart.size,
+                        heart.size * 2,
+                        heart.size * 2
+                    )
+                ):
+                    heart.hp -= CIRCLE_BULLET_DAMAGE if phase < 3 else HOMING_BULLET_DAMAGE
+                    bullets.remove(b)
+                    if heart.hp <= 0:
+                        pygame.quit()
+                        return "LOSE"
+
+            # ---- 繪圖 ----
+            pygame.draw.rect(screen, (255, 0, 0), BOX_RECT, 2)
+            heart.draw(screen)
+            for b in bullets:
+                b.draw(screen)
+
+            screen.blit(font.render(f"FINAL BOSS PHASE {phase}", True, (255, 100, 100)), (120, 10))
+            screen.blit(font.render(f"HP: {heart.hp}", True, (255, 255, 255)), (20, 330))
+            screen.blit(font.render(f"Time: {remaining_time}", True, (255, 255, 255)), (350, 330))
+
+            pygame.display.update()
+
+            if remaining_time <= 0:
+                pygame.quit()
+                return "WIN"
+    except Exception as e:
+        print(f"戰鬥過程出錯：{e}")
+        pygame.quit()
+        return "ERROR"
 
 
 # ================= 測試選單 =================

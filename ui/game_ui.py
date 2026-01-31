@@ -143,13 +143,21 @@ class GameUI:
             base_dir = os.path.dirname(os.path.dirname(__file__))
             full_path = os.path.join(base_dir, image_path)
 
+            # 驗證檔案存在
+            if not os.path.exists(full_path):
+                self.image_label.config(image="", width=1, height=1)
+                return
+
             img = Image.open(full_path)
             img = img.resize((UI_IMAGE_WIDTH, UI_IMAGE_HEIGHT), Image.Resampling.LANCZOS)
             self.current_image = ImageTk.PhotoImage(img)
             self.image_label.config(image=self.current_image, width=UI_IMAGE_WIDTH, height=UI_IMAGE_HEIGHT)
 
+        except FileNotFoundError:
+            # 圖片檔案不存在，靜默處理
+            self.image_label.config(image="", width=1, height=1)
         except Exception as e:
-            print("圖片載入失敗：", e)
+            # PIL 無法打開或處理圖片，靜默處理
             self.image_label.config(image="", width=1, height=1)
 
 
