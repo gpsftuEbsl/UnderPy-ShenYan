@@ -102,7 +102,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
 (妳可以在這裡更新工作日誌)""",
         "choices": {
             "寫日誌 (存檔)": "SAVE_GAME",
-            "繼續前進": "LEVEL_2_GOBLIN"
+            "繼續前進": "MANAGER_ENCOUNTER"
         },
         "image": "assets/images/pantry.png"
     },
@@ -122,7 +122,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
         "choices": {
             "拒絕加班 (戰鬥)": "START_MANAGER_BATTLE"
         },
-        "image": "assets/images/goblin_manager.png"
+        "image": "assets/images/manager.png"
     },
 
     "MANAGER_DEFEATED": {
@@ -185,7 +185,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
 
 機房連接著三個區域：""",
         "choices": {
-            "Legacy Code 區 (左)": "LEGACY_CODE_AREA",
+            "Legacy Code區 (左)": "LEGACY_CODE_AREA",
             "哲學牆 (右)": "PHILOSOPHY_WALL",
             "系統終端機 (前)": "TERMINAL_PUZZLE"
         },
@@ -196,10 +196,14 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
     # --- 房間 1：Legacy Code ---
     "LEGACY_CODE_AREA": {
         "text": """妳走進左側區域，盡頭是一扇貼著「勿動」封條的黑色機櫃。
-那是傳說中的 Legacy Code (遺留代碼)。
+那是傳說中的 Legacy Code (遺留代碼) (ㄕˇㄕㄢ ㄉㄞˋㄇㄚˇ)。
 妳試著打開它，但權限不足。
 
-看來不解開終端機的鎖是過不去的。""",
+妳忽然理解：這台機櫃像是公司的「總鑰匙櫃」。
+電梯的最高權限被鎖在這些陳年代碼裡，
+沒有解開終端機的鎖，就拿不到最高權限，電梯也不會動。
+
+看來必須先解開終端機，才能啟動大門。""",
         "choices": {
             "返回機房": "SERVER_ROOM_START"
         },
@@ -212,9 +216,9 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
         "text": """這是一個堆滿紙箱的文檔室。
 妳注意到牆上掛著公司創辦人的三句名言 (雖然都沒做到)：
 
-1.『創新』：要像圓形一樣圓融，滾動向前。
-2.『誠信』：要像正方形一樣正直，方方正正。
-3.『穩定』：要像三角形一樣穩固，支撐一切。""",
+1.『創新』：做人要圓融，並創新滾動向前。(硯:但主管好像不太...)
+2.『誠信』：與客戶需有誠信，正直真誠。(硯:...)
+3.『穩定』：代碼需要穩定穩固，支撐一切。(硯:哈哈哈...)""",
         "choices": {
             "返回機房": "SERVER_ROOM_START"
         },
@@ -229,9 +233,9 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
 
 根據文檔室那三句騙人的鬼話，順序應該是？""",
         "choices": {
-            "█ (正直)": "PUZZLE_SELECT_SQUARE",
-            "◯ (圓融)": "PUZZLE_SELECT_CIRCLE",
-            "△ (穩固)": "PUZZLE_SELECT_TRIANGLE",
+            "█": "PUZZLE_SELECT_SQUARE",
+            "◯": "PUZZLE_SELECT_CIRCLE",
+            "△": "PUZZLE_SELECT_TRIANGLE",
             "放棄": "SERVER_ROOM_START"
         },
         "type": "PUZZLE",
