@@ -1,5 +1,5 @@
 # story/script.py
-# 沈硯版：社畜的逃脫 (正式版 - 無 Debug 按鈕)
+# 沈硯版：社畜的逃脫
 
 SCENE_SCRIPT = {
     # ==========================================
@@ -28,7 +28,7 @@ SCENE_SCRIPT = {
             "檢查備份 (讀取)": "LOAD_GAME"
             # [DEBUG] 按鈕已移除
         },
-        "image": "assets/images/dungeon.png",
+        "image": "assets/images/office_cubicle.png",
         "type": "NORMAL"
     },
 
@@ -57,7 +57,7 @@ SCENE_SCRIPT = {
             "檢查備份 (讀取)": "LOAD_GAME"
             # [DEBUG] 按鈕已移除
         },
-        "image": "assets/images/dungeon.png",
+        "image": "assets/images/office_cubicle.png",
         "type": "NORMAL"
     },
 
@@ -76,7 +76,7 @@ Kevin：「硯姊... 那個...
             "幫他修 Code (戰鬥)": "BATTLE_SLIME",
             "請假回家 (逃跑)": "END_RUN"
         },
-        "image": "assets/images/slime.png"
+        "image": "assets/images/slime_intern.png"
     },
 
     "WIN_SLIME": {
@@ -90,7 +90,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
             "前往二樓會議室": "LEVEL_2_GOBLIN",
             "在茶水間休息 (存檔)": "SAFE_ZONE_1"
         },
-        "image": "assets/images/stairs_down.png"
+        "image": "assets/images/office_hallway.png"
     },
 
     # ---  存檔點 (茶水間) ---
@@ -104,7 +104,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
             "寫日誌 (存檔)": "SAVE_GAME",
             "繼續前進": "LEVEL_2_GOBLIN"
         },
-        "image": "assets/images/campfire.png"
+        "image": "assets/images/pantry.png"
     },
 
     # ==========================================
@@ -122,7 +122,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
         "choices": {
             "拒絕加班 (戰鬥)": "START_GOBLIN_BATTLE"
         },
-        "image": "assets/images/goblin_taunt.png"
+        "image": "assets/images/goblin_manager.png"
     },
 
     "GOBLIN_DEFEATED": {
@@ -136,7 +136,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
             "逼他簽字": "GOBLIN_KILLED",
             "放過他": "GOBLIN_SPARED"
         },
-        "image": "assets/images/goblin_cry.png"
+        "image": "assets/images/manager_cry.png"
     },
 
     "GOBLIN_KILLED": {
@@ -150,7 +150,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
         "choices": {
             "前往大門": "LEVEL_2_GATE"
         },
-        "image": "assets/images/empty_room.png"
+        "image": "assets/images/empty_meeting_room.png"
     },
 
     "GOBLIN_SPARED": {
@@ -163,7 +163,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
         "choices": {
             "前往大門": "LEVEL_2_GATE"
         },
-        "image": "assets/images/goblin_happy.png"
+        "image": "assets/images/manager_happy.png"
     },
 
     "LEVEL_2_GATE": {
@@ -171,7 +171,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
 門禁系統顯示：『請輸入加班通行密碼』""",
         "choices": {}, 
         "type": "INPUT", 
-        "image": "assets/images/door_locked.png"
+        "image": "assets/images/security_gate.png"
     },
 
     # ==========================================
@@ -189,7 +189,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
             "歷史文檔室 (右)": "L3_ART_ROOM",
             "系統終端機 (前)": "L3_PUZZLE_ROOM"
         },
-        "image": "assets/images/palace_hall.png",
+        "image": "assets/images/server_room.png",
         "type": "NORMAL"
     },
 
@@ -203,7 +203,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
         "choices": {
             "返回機房": "LEVEL_3_START"
         },
-        "image": "assets/images/black_door_closed.png",
+        "image": "assets/images/legacy_server.png",
         "type": "NORMAL"
     },
 
@@ -218,7 +218,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
         "choices": {
             "返回機房": "LEVEL_3_START"
         },
-        "image": "assets/images/art_room.png",
+        "image": "assets/images/history_wall.png",
         "type": "NORMAL"
     },
 
@@ -235,7 +235,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
             "放棄": "LEVEL_3_START"
         },
         "type": "PUZZLE",
-        "image": "assets/images/dark_puzzle_room.png"
+        "image": "assets/images/terminal_screen.png"
     },
 
     # --- 解謎成功 ---
@@ -246,7 +246,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
         "choices": {
             "前往頂樓前廳": "SAFE_ZONE_2"
         },
-        "image": "assets/images/door_open_metal.png"
+        "image": "assets/images/elevator_open.png"
     },
 
     # --- 最終存檔點 (頂樓前廳) ---
@@ -262,7 +262,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
             "深呼吸，推開大門": "BOSS_PRELUDE",
             "返回機房": "LEVEL_3_START"
         },
-        "image": "assets/images/campfire.png"
+        "image": "assets/images/pantry.png"
     },
 
     # --- Boss 戰前奏 (一周目) ---
@@ -273,7 +273,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
         "choices": {
             "遞出辭呈 (戰鬥)": "BOSS_BATTLE"
         },
-        "image": "assets/images/boss_room.png"
+        "image": "assets/images/boss_desk.png"
     },
 
     # --- Boss 戰前奏 (二周目/真相篇) ---
@@ -291,7 +291,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
         "choices": {
             "準備離職 (迎接終結)": "BOSS_BATTLE"
         },
-        "image": "assets/images/boss_room.png"
+        "image": "assets/images/boss_desk.png"
     },
 
     # --- 戰勝 Boss (一周目) ---
@@ -308,7 +308,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
         "choices": {
             "走向白光": "END_WIN"
         },
-        "image": "assets/images/boss_explode.png"
+        "image": "assets/images/office_collapse.png"
     },
 
     # --- 戰勝 Boss (二周目/真結局) ---
@@ -322,7 +322,7 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
         "choices": {
             "永久登出 (結束輪迴)": "TRUE_END"
         },
-        "image": "assets/images/boss_explode.png"
+        "image": "assets/images/office_collapse.png"
     },
 
     "TRUE_END": {
@@ -334,13 +334,13 @@ Kevin：「謝謝硯姊！妳好厲害喔！那我先下班囉！」
 (真結局達成 ! 感謝遊玩 UnderPy！)
 (press ESC to exit)""",
         "choices": {}, 
-        "image": "assets/images/the_end.png"
+        "image": "assets/images/end_credit.png"
     },
 
     # --- 結局 ---
-    "END_RUN": {"text": "妳逃回家睡覺了。但明天還是要上班。\n(Bad End: 社畜輪迴)", "choices": {}, "image": "assets/images/the_end.png"},
-    "END_LOSE": {"text": "妳過勞倒下了。\n(Bad End: 肝臟過勞)", "choices": {}, "image": "assets/images/the_end.png"},
-    "END_WIN": {"text": "恭喜離職！開啟新人生！", "choices": {}, "image": "assets/images/the_end.png"},
+    "END_RUN": {"text": "妳逃回家睡覺了。但明天還是要上班。\n(Bad End: 社畜輪迴)", "choices": {}, "image": "assets/images/hospital_ceiling.png"},
+    "END_LOSE": {"text": "妳過勞倒下了。\n(Bad End: 肝臟過勞)", "choices": {}, "image": "assets/images/hospital_ceiling.png"},
+    "END_WIN": {"text": "恭喜離職！開啟新人生！", "choices": {}, "image": "assets/images/freedom_sky.png"},
 
     # ==========================================
     # 除錯模式 (Orphan Node - Unreachable by players)
@@ -358,7 +358,7 @@ Please select a chapter to jump to...
             "5. Boss (True Loop)": "BOSS_PRELUDE_LOOP",
             "6. Back to Start": "START"
         },
-        "image": "assets/images/dark_puzzle_room.png",
+        "image": "assets/images/terminal_screen.png",
         "type": "NORMAL"
     }
 }
